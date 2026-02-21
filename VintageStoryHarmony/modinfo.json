@@ -1,0 +1,14 @@
+{
+    "$schema": "https://moddbcdn.vintagestory.at/schema/modinfo.latest.json",
+    "type": "Code",
+    "modid": "vulpis",
+    "name": "Vulpis!",
+    "authors": [
+        "Kortah"
+    ],
+    "description": "A simple WereWolf Mod, I made. Officialy My first published Mod -- Like Ever... May Break in Multiplayer",
+    "version": "1.0.2",
+    "dependencies": {
+        "game": "1.21.0"
+    }
+}
