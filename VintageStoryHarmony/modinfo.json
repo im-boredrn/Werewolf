@@ -7,7 +7,7 @@
         "Kortah"
     ],
     "description": "A simple WereWolf Mod, I made. Officialy My first published Mod -- Like Ever... May Break in Multiplayer",
-    "version": "1.0.2",
+    "version": "1.0.0",
     "dependencies": {
         "game": "1.21.0"
     }

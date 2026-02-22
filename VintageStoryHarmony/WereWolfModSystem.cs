@@ -28,7 +28,6 @@ namespace VintageStoryHarmony
         public bool ManualFormActive = false;
         public Forms ManualForm;
 
-        private float regenDebugTimer = 0f;
 
         public static WerewolfConfig? Config;
 
@@ -73,8 +72,6 @@ namespace VintageStoryHarmony
                     WereWolfAnimalLootDropRate = 2f,
                     WereWolfAnimalHarvestingTime = 2f,
                     WereWolfBowDrawingStrength = 2f,
-                    WereWolfNightRegen = 0.25f,
-                    WereWolfDayRegen = 0.05f
                 };
 
                 api.StoreModConfig(Config, "werewolf-config.json");
@@ -151,15 +148,13 @@ namespace VintageStoryHarmony
                 // Decide form based on night/day or manual toggle
                 Transform.Transformation(entity, entity);
 
+               
                 // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
                 // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
 
                 // Regeneration For Wolf
 
-                if (PlayerData.GetForm(entity) == PlayerData.Forms.WereWolf)
-                {
-                    ApplyRegen(entity, dt);
-                }
+               
 
 
 
@@ -170,35 +165,12 @@ namespace VintageStoryHarmony
 
         }
 
-        private void ApplyRegen(EntityPlayer entity, float dt)
-        {
-
-            bool night = WolfTime.isNight(entity);
-
-            float currentHealth = entity.Stats.GetBlended("currenthealth");
-            float maxHealth = entity.Stats.GetBlended("maxhealth");
-
-            if (currentHealth >= maxHealth) return;
-
-            // Regen per second from config
-            float regenPerSecond = night ? WereWolfModSettings.NightRegen : WereWolfModSettings.DayRegen;
-            float healAmount = regenPerSecond * dt;
-
-            // Apply healing via negative damage to properly update engine and sync to clients
-            entity.ReceiveDamage(new Vintagestory.API.Common.DamageSource() { SourceEntity = null }, -healAmount);
-
-            // Optional: debug log every 1s
-            regenDebugTimer += dt;
-            if (regenDebugTimer >= 1f)
-            {
-                regenDebugTimer = 0f;
-                sapi?.Logger.Notification($"[WerewolfRegen] {entity.Player?.PlayerName} HP: {entity.Stats.GetBlended("health")}/{maxHealth} | Night: {night}");
-            }
+      
 
                 }
             
         }
-    }
+    
 
 
 

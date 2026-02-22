@@ -72,22 +72,14 @@ namespace VintageStoryHarmony.assets
                 stat.Remove("animalHarvestingTime", "werewolfmod");
                 stat.Remove("bowDrawingStrength", "werewolfmod");
             }
-           
-            
-            // --- Sync current health proportionally ---
-            float newMax = stat.GetBlended("maxhealth");
-            float currentHealth = stat.GetBlended("health");
-            float scaledHealth = currentHealth * (newMax / oldMax);
-            float healAmount = scaledHealth - currentHealth;
 
-            if (healAmount != 0)
-            {
-                player.ReceiveDamage(new Vintagestory.API.Common.DamageSource() { SourceEntity = null }, -healAmount);
-            }
+
+       
+        }
 
         }
             }
 
-        }
+        
     
 

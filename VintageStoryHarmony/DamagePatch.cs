@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using VintageStoryHarmony.assets;
+using WereWolf.assets.Werewolf;
 using WereWolf.assets.Werewolf.Configuration;
 using static VintageStoryHarmony.assets.PlayerData;
 
@@ -86,9 +87,19 @@ namespace VintageStoryHarmony
             // 5. Apply final damage
             damage *= multiplier;
 
+
+
             // Debug
             if (attackerPlayer != null)
+{
                 Console.WriteLine($"Form: {attackerForm}, DamageMultiplier: {WereWolfModSettings.Damage}, FinalDamage: {damage}");
+}
+
+
+
+          
+
+           
         }
     }
 }
