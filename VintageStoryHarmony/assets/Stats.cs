@@ -32,7 +32,7 @@ namespace VintageStoryHarmony.assets
 
                 // Core Stats
                 stat.Set("maxhealthExtraPoints", "werewolfmod", WereWolfModSettings.MaxHealth, true );
-                stat.Set("healingeffectivness", "werewolfmod",WereWolfModSettings.Regen , true);
+                stat.Set("healingeffectivness", "werewolfmod",WereWolfModSettings.HealingEffectivness , true);
                 stat.Set("rangedWeaponsAcc", "werewolfmod",WereWolfModSettings.RangedAcc , true);
 
 

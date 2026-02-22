@@ -22,7 +22,10 @@ namespace WereWolf.assets.Werewolf.Configuration
         public static float DamageReduction => WereWolfModSystem.Config?.WereWolfDamageReduction ?? 0.5f; // Harmony
         //Health
         public static float MaxHealth => WereWolfModSystem.Config?.WereWolfMaxHealth ?? 2.0f;
-        public static float Regen => WereWolfModSystem.Config?.WereWolfRegen ?? 2.0f;
+        public static float HealingEffectivness => WereWolfModSystem.Config?.WereWolfHealingEffectivness ?? 2.0f;
+        public static float NightRegen => WereWolfModSystem.Config?.WereWolfNightRegen ?? 0.025f;
+        public static float DayRegen => WereWolfModSystem.Config?.WereWolfDayRegen ?? 0.05f;
+
 
 
         //Misc

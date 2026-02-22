@@ -17,9 +17,12 @@ namespace WereWolf.assets.Werewolf.Configuration
         public float WerewolfDamage { get; set; } = 2.0f; // Harmony
         public float WereWolfDamageReduction  { get; set; } = 0.80f; // Harmony 
         public float WereWolfMaxHealth { get; set; } = 2.0f;
-        public float WereWolfRegen { get; set; } = 2.0f;
+        public float WereWolfHealingEffectivness { get; set; } = 2.0f;
         public float WereWolfRangedAcc { get; set; } = 0.10f;
         public bool WereWolfDisableFallDamage { get; set; } = true;
+        public float WereWolfNightRegen { get; set; } = 0.25f;
+        public float WereWolfDayRegen { get; set; } = 0.05f;
+
 
 
 

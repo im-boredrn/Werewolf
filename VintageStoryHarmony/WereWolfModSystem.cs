@@ -63,7 +63,7 @@ namespace VintageStoryHarmony
                     WerewolfDamage = 2.0f,
                     WereWolfDamageReduction = 0.5f,
                     WereWolfMaxHealth = 20f,
-                    WereWolfRegen = 1f,
+                    WereWolfHealingEffectivness = 1f,
                     WereWolfRangedAcc = 0.1f,
                     WereWolfDisableFallDamage = true,
                     WereWolfForageDropRate = 2f,
@@ -72,6 +72,8 @@ namespace VintageStoryHarmony
                     WereWolfAnimalLootDropRate = 2f,
                     WereWolfAnimalHarvestingTime = 2f,
                     WereWolfBowDrawingStrength = 2f,
+                    WereWolfDayRegen = 0.05f,
+                    WereWolfNightRegen = 0.025f
                 };
 
                 api.StoreModConfig(Config, "werewolf-config.json");
@@ -165,9 +167,17 @@ namespace VintageStoryHarmony
 
         }
 
-      
+        private void ApplyRegen(EntityPlayer entity)
+        {
+            var form = PlayerData.GetForm(entity);
+            bool night = WolfTime.isNight(entity);
+            bool day = !night;
 
-                }
+
+        }
+
+
+    }
             
         }
     
