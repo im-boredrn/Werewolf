@@ -4,11 +4,13 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using VintageStoryHarmony.assets;
 using WereWolf.assets.Werewolf;
 using WereWolf.assets.Werewolf.Configuration;
+using Vintagestory.GameContent;
 using static VintageStoryHarmony.assets.PlayerData;
 
 namespace VintageStoryHarmony
@@ -149,14 +151,14 @@ namespace VintageStoryHarmony
 
                 // Decide form based on night/day or manual toggle
                 Transform.Transformation(entity, entity);
+                ApplyRegen(entity);
 
-               
                 // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
                 // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
 
                 // Regeneration For Wolf
 
-               
+
 
 
 
@@ -167,19 +169,35 @@ namespace VintageStoryHarmony
 
         }
 
+
+
+
+
         private void ApplyRegen(EntityPlayer entity)
         {
             var form = PlayerData.GetForm(entity);
             bool night = WolfTime.isNight(entity);
-            bool day = !night;
+            // bool day = !night; // optional, not used here
 
+            var healthBehavior = entity?.GetBehavior<Vintagestory.GameContent.EntityBehaviorHealth>();
+
+            if (healthBehavior != null && form == Forms.WereWolf && night)
+            {
+                // Add regen safely, capped at MaxHealth
+                healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + WereWolfModSettings.NightRegen);
+
+
+            }
+            else if (healthBehavior != null && form == Forms.WereWolf && !night)
+            {
+                healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + WereWolfModSettings.DayRegen);
+
+            }
 
         }
-
-
     }
-            
-        }
+}
+
     
 
 

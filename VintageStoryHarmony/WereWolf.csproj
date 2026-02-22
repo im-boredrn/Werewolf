@@ -20,6 +20,18 @@
       <HintPath>$(VINTAGE_STORY)/VintagestoryLib.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="VintagestoryServer">
+      <HintPath>E:\Vintagestory\VintagestoryServer.dll</HintPath>
+		<Private>false</Private>
+	</Reference>
+    <Reference Include="VSEssentials">
+      <HintPath>E:\Vintagestory\Mods\VSEssentials.dll</HintPath>
+	<Private>false</Private>
+	</Reference>
+    <Reference Include="VSSurvivalMod">
+      <HintPath>E:\Vintagestory\Mods\VSSurvivalMod.dll</HintPath>
+		<Private>false</Private>
+	</Reference>
   </ItemGroup>
 
 <ItemGroup>
