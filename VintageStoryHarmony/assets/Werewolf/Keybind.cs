@@ -16,11 +16,13 @@ namespace WereWolf.assets.Werewolf
     public class Keybind
     {
 
-
-
+        private static long lastPressTime = 0; // store the last time the key was pressed
+        private const long cooldownMs = 300000; // 5 minute  cooldown
+        private static bool keyPressed = false;
 
         public static bool OnKeybindPress(KeyCombination comb)
         {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var mod = WereWolfModSystem.Instance;
             if (mod?.Capi == null) return false;
@@ -28,30 +30,66 @@ namespace WereWolf.assets.Werewolf
             var player = mod.Capi.World.Player?.Entity as EntityPlayer;
             if (player == null) return false;
 
+            int remaining;
+            if (IsOnCooldown(out remaining))
+            {
+                if (!keyPressed) // only notify the first time, this stops cooldown text spamming
+                {
+                    mod.Capi.TriggerIngameError(player, "cooldown", $"On Cooldown! Wait: {remaining} minutes.");
+                }
+                keyPressed = true; // mark key as being held
+
+
+             
+                return false;
+
+            }
+            lastPressTime = now;
+
+            keyPressed = false;   // reset if action succeeds
+
             if (!mod.ManualFormActive)
+                {
+                    // Enable manual mode
+                    mod.ManualFormActive = true;
+
+                    var current = PlayerData.GetForm(player);
+                    mod.ManualForm = (current == PlayerData.Forms.Human)
+                        ? PlayerData.Forms.WereWolf
+                        : PlayerData.Forms.Human;
+
+                    // Apply immediately
+                    PlayerData.SetForm(player, mod.ManualForm);
+                    Stats.ApplyStats(player, mod.ManualForm);
+                }
+                else
+                {
+                    // Disable manual mode
+                    mod.ManualFormActive = false;
+
+                    // Do NOT set form here.
+                    // Let server tick decide next second.
+                }
+
+                return true; // tells the game I handled the keypress
+         }
+
+        
+
+        private static bool IsOnCooldown(out int remainingMinutes)
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (now - lastPressTime < cooldownMs) // if on cooldown
             {
-                // Enable manual mode
-                mod.ManualFormActive = true;
-
-                var current = PlayerData.GetForm(player);
-                mod.ManualForm = (current == PlayerData.Forms.Human)
-                    ? PlayerData.Forms.WereWolf
-                    : PlayerData.Forms.Human;
-
-                // Apply immediately
-                PlayerData.SetForm(player, mod.ManualForm);
-                Stats.ApplyStats(player, mod.ManualForm);
-            }
-            else
-            {
-                // Disable manual mode
-                mod.ManualFormActive = false;
-
-                // Do NOT set form here.
-                // Let server tick decide next second.
+                // calculate remaining time
+                remainingMinutes = (int)Math.Ceiling((cooldownMs - (now - lastPressTime)) / 60000.0);
+                return true;
             }
 
-            return true; // tells the game we handled the keypress
+            // not on cooldown, update last press
+            remainingMinutes = 0;
+            return false;
+
         }
     }
 }

@@ -26,7 +26,6 @@ namespace VintageStoryHarmony
 
         private ICoreServerAPI? sapi;
         private long tickListenerId;
-
         public bool ManualFormActive = false;
         public Forms ManualForm;
 
@@ -124,14 +123,13 @@ namespace VintageStoryHarmony
 
         {
             Capi = api;
-
             api.Input.RegisterHotKey("togglewerewolf", "Toggle Werewolf Form", GlKeys.G, HotkeyType.CharacterControls);
             api.Input.SetHotKeyHandler("togglewerewolf", Keybind.OnKeybindPress);
 
             api.Logger.Warning($"KEYBIND ran on: {api.Side}");
 
-
-            Mod.Logger.Notification("Hello from template mod client side: " + Lang.Get("vintagestoryharmony:hello"));
+        
+        Mod.Logger.Notification("Hello from template mod client side: " + Lang.Get("vintagestoryharmony:hello"));
         }
 
         private void OnServerTick(float dt)
