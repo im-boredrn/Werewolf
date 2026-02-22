@@ -7,6 +7,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
+using Vintagestory.GameContent;
 using WereWolf.assets.Werewolf.Configuration;
 
 namespace VintageStoryHarmony.assets
@@ -73,8 +74,12 @@ namespace VintageStoryHarmony.assets
                 stat.Remove("bowDrawingStrength", "werewolfmod");
             }
 
+            var healthBehavior = player.GetBehavior<EntityBehaviorHealth>();
+            if (healthBehavior != null)
+            {
+                healthBehavior.MarkDirty();
+            }
 
-       
         }
 
         }
