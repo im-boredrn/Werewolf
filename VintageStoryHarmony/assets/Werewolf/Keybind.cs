@@ -9,6 +9,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 using VintageStoryHarmony;
 using VintageStoryHarmony.assets;
+using WereWolf.assets.Werewolf.Configuration;
 using static VintageStoryHarmony.assets.PlayerData;
 
 namespace WereWolf.assets.Werewolf
@@ -17,7 +18,6 @@ namespace WereWolf.assets.Werewolf
     {
 
         private static long lastPressTime = 0; // store the last time the key was pressed
-        private const long cooldownMs = 300000; // 5 minute  cooldown
         private static bool keyPressed = false;
 
         public static bool OnKeybindPress(KeyCombination comb)
@@ -78,6 +78,7 @@ namespace WereWolf.assets.Werewolf
 
         private static bool IsOnCooldown(out int remainingMinutes)
         {
+            long cooldownMs = WereWolfModSettings.TransformCooldown * 60000L;
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (now - lastPressTime < cooldownMs) // if on cooldown
             {

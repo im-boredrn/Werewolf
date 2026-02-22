@@ -22,6 +22,8 @@ namespace WereWolf.assets.Werewolf.Configuration
         public bool WereWolfDisableFallDamage { get; set; } = true;
         public float WereWolfNightRegen { get; set; } = 0.25f;
         public float WereWolfDayRegen { get; set; } = 0.05f;
+        public long WereWolfTransformCoolDown { get; set; } = 5;
+
 
 
 

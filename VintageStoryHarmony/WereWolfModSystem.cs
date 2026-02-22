@@ -52,13 +52,21 @@ namespace VintageStoryHarmony
             Mod.Logger.Notification("WEREWOLF MOD LOADED!");
 
 
-            Config = api.LoadModConfig<WerewolfConfig>("werewolf-config.json");
-
+            try
+            {
+                Config = api.LoadModConfig<WerewolfConfig>("werewolf-config.json");
+            }
+            catch (Exception e)
+            {
+                api.Logger.Warning($"Failed to load werewolf-config.json: {e.Message}");
+                Config = null;
+            }
             // If config is null OR any field is null, create a default one
             if (Config == null)
             {
                 Config = new WerewolfConfig
                 {
+                    
                     WerewolfSpeed = 1.3f,
                     WereWolfJump = 1.3f,
                     WerewolfDamage = 2.0f,
@@ -74,13 +82,15 @@ namespace VintageStoryHarmony
                     WereWolfAnimalHarvestingTime = 2f,
                     WereWolfBowDrawingStrength = 2f,
                     WereWolfDayRegen = 0.05f,
-                    WereWolfNightRegen = 0.025f
+                    WereWolfNightRegen = 0.025f,
+                    WereWolfTransformCoolDown = 5
                 };
 
-                api.StoreModConfig(Config, "werewolf-config.json");
+                api.Logger.Notification("Config loaded and validated. Any invalid values were reset to safe defaults.");
                 api.Logger.Notification("Werewolf default config created!");
             }
-
+            ValidateConfig();
+            api.StoreModConfig(Config, "werewolf-config.json");
 
             Mod.Logger.Notification("WEREWOLF MOD LOADED!");
 
@@ -92,8 +102,9 @@ namespace VintageStoryHarmony
                {
                    WereWolfModSystem.Config = api.LoadModConfig<WerewolfConfig>("werewolf-config.json");
 
-
-                   return TextCommandResult.Success("Werewolf config reloaded!");
+                   ValidateConfig();
+                   api.StoreModConfig(Config, "werewolf-config.json");
+                   return TextCommandResult.Success("Werewolf config reloaded!\n Config loaded and validated. Any invalid values were reset to safe defaults");
 
 
 
@@ -191,10 +202,43 @@ namespace VintageStoryHarmony
                 healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + WereWolfModSettings.DayRegen);
 
             }
-
         }
+
+             private void ValidateConfig()
+        {
+
+            if (Config == null) return;
+
+            // Movement
+            Config.WerewolfSpeed = Math.Clamp(Config.WerewolfSpeed, 0.1f, 10f);
+            Config.WereWolfJump = Math.Clamp(Config.WereWolfJump, 0.1f, 10f);
+
+            // Core Stats
+            Config.WerewolfDamage = Math.Clamp(Config.WerewolfDamage, 0f, 100f);
+            Config.WereWolfDamageReduction = Math.Clamp(Config.WereWolfDamageReduction, 0f, 1f);
+            Config.WereWolfMaxHealth = Math.Clamp(Config.WereWolfMaxHealth, 1f, 500f);
+            Config.WereWolfHealingEffectivness = Math.Clamp(Config.WereWolfHealingEffectivness, 0f, 10f);
+            Config.WereWolfRangedAcc = Math.Clamp(Config.WereWolfRangedAcc, 0f, 1f);
+
+            // Regeneration
+            Config.WereWolfDayRegen = Math.Clamp(Config.WereWolfDayRegen, 0f, 5f);
+            Config.WereWolfNightRegen = Math.Clamp(Config.WereWolfNightRegen, 0f, 5f);
+
+            // Cooldown (minutes)
+            Config.WereWolfTransformCoolDown = Math.Clamp(Config.WereWolfTransformCoolDown, 0, 30);
+
+            // Wolf Abilities
+            Config.WereWolfForageDropRate = Math.Clamp(Config.WereWolfForageDropRate, 0f, 10f);
+            Config.WereWolfWildCropDropRate = Math.Clamp(Config.WereWolfWildCropDropRate, 0f, 10f);
+            Config.WereWolfAnimalSeekingRange = Math.Clamp(Config.WereWolfAnimalSeekingRange, 0f, 50f);
+            Config.WereWolfAnimalLootDropRate = Math.Clamp(Config.WereWolfAnimalLootDropRate, 0f, 10f);
+            Config.WereWolfAnimalHarvestingTime = Math.Clamp(Config.WereWolfAnimalHarvestingTime, 0f, 30f);
+            Config.WereWolfBowDrawingStrength = Math.Clamp(Config.WereWolfBowDrawingStrength, 0f, 10f);
+        }
+
     }
-}
+    }
+
 
     
 
