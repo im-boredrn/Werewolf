@@ -39,6 +39,8 @@ namespace WereWolf.assets.Werewolf.Configuration
         public static float AnimalLootDropRate => WereWolfModSystem.Config?.WereWolfAnimalLootDropRate ?? 2.0f;
         public static float AnimalHarvestingTime => WereWolfModSystem.Config?.WereWolfAnimalHarvestingTime ?? 2.0f;
         public static float BowDrawingStrength => WereWolfModSystem.Config?.WereWolfBowDrawingStrength ?? 2.0f  ;
+        public static float EnabledMinBrightness => WereWolfModSystem.Config?.WereWolfRangedAcc ?? 0.8f;
+
 
     }
 }

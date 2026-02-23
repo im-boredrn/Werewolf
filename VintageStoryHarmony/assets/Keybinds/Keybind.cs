@@ -12,7 +12,7 @@ using VintageStoryHarmony.assets;
 using WereWolf.assets.Werewolf.Configuration;
 using static VintageStoryHarmony.assets.PlayerData;
 
-namespace WereWolf.assets.Werewolf
+namespace WereWolf.assets.Keybinds
 {
     public class Keybind
     {

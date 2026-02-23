@@ -36,6 +36,7 @@ namespace WereWolf.assets.Werewolf.Configuration
         public float WereWolfAnimalLootDropRate { get; set; } = 2.0f;
         public float WereWolfAnimalHarvestingTime { get; set; } = 2.0f;
         public float WereWolfBowDrawingStrength { get; set; } = 2.0f;
+        public float WereWolfEnabledMinBrightness { get; set; } = 0.8f; // Night vision brightness
 
 
     }

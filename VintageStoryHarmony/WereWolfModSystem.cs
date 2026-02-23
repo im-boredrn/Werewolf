@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Vintagestory.API.Client;
@@ -7,10 +8,12 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using Vintagestory.Client.NoObf;
+using Vintagestory.GameContent;
 using VintageStoryHarmony.assets;
+using WereWolf.assets.Keybinds;
 using WereWolf.assets.Werewolf;
 using WereWolf.assets.Werewolf.Configuration;
-using Vintagestory.GameContent;
 using static VintageStoryHarmony.assets.PlayerData;
 
 namespace VintageStoryHarmony
@@ -29,14 +32,21 @@ namespace VintageStoryHarmony
         public bool ManualFormActive = false;
         public Forms ManualForm;
 
+        private bool wolfVisionEnabled = false;
+
 
         public static WerewolfConfig? Config;
 
         public static WereWolfModSystem? Instance; // optional for easy access
 
 
+
+
         public const string PLUGIN_GUID = "kortah.werewolf";
         public const string PLUGIN_NAME = "Werewolf!";
+
+       // private WolfVisionRenderer? wolfVisionRenderer;
+
         public override void Start(ICoreAPI api)
         {
 
@@ -51,6 +61,14 @@ namespace VintageStoryHarmony
 
             Mod.Logger.Notification("WEREWOLF MOD LOADED!");
 
+            //Shader Loading
+
+            
+
+
+
+
+            // Config
 
             try
             {
@@ -66,7 +84,7 @@ namespace VintageStoryHarmony
             {
                 Config = new WerewolfConfig
                 {
-                    
+
                     WerewolfSpeed = 1.3f,
                     WereWolfJump = 1.3f,
                     WerewolfDamage = 2.0f,
@@ -83,7 +101,8 @@ namespace VintageStoryHarmony
                     WereWolfBowDrawingStrength = 2f,
                     WereWolfDayRegen = 0.05f,
                     WereWolfNightRegen = 0.025f,
-                    WereWolfTransformCoolDown = 5
+                    WereWolfTransformCoolDown = 5,
+                    WereWolfEnabledMinBrightness = 0.8f
                 };
 
                 api.Logger.Notification("Config loaded and validated. Any invalid values were reset to safe defaults.");
@@ -134,13 +153,26 @@ namespace VintageStoryHarmony
 
         {
             Capi = api;
-            api.Input.RegisterHotKey("togglewerewolf", "Toggle Werewolf Form", GlKeys.G, HotkeyType.CharacterControls);
-            api.Input.SetHotKeyHandler("togglewerewolf", Keybind.OnKeybindPress);
 
             api.Logger.Warning($"KEYBIND ran on: {api.Side}");
 
-        
-        Mod.Logger.Notification("Hello from template mod client side: " + Lang.Get("vintagestoryharmony:hello"));
+            api.Input.RegisterHotKey("togglewerewolf", "Toggle Werewolf Form", GlKeys.G, HotkeyType.CharacterControls);
+            api.Input.SetHotKeyHandler("togglewerewolf", Keybind.OnKeybindPress);
+         //   wolfVisionRenderer = new WolfVisionRenderer(api);
+
+
+            //if (wolfVisionRenderer == null)
+            {
+                return;
+            }
+           // api.Input.RegisterHotKey("togglewolfvision", "Toggle WolfVision", GlKeys.V, HotkeyType.CharacterControls);
+
+            //api.Input.SetHotKeyHandler("togglewolfvision", wolfVisionRenderer.Toggle);
+            
+            // Fixed: the overload expects a System.Type as the 6th parameter, not a bool.
+           // api.Event.RegisterRenderer(wolfVisionRenderer, EnumRenderStage.AfterPostProcessing, "WolfVision", 0.85, 0.85, typeof(WolfVisionRenderer));
+
+
         }
 
         private void OnServerTick(float dt)
@@ -160,12 +192,14 @@ namespace VintageStoryHarmony
 
                 // Decide form based on night/day or manual toggle
                 Transform.Transformation(entity, entity);
+                // Regeneration For Wolf
+
+
                 ApplyRegen(entity);
 
                 // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
                 // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
 
-                // Regeneration For Wolf
 
 
 
@@ -186,13 +220,12 @@ namespace VintageStoryHarmony
         {
             var form = PlayerData.GetForm(entity);
             bool night = WolfTime.isNight(entity);
-            // bool day = !night; // optional, not used here
 
             var healthBehavior = entity?.GetBehavior<Vintagestory.GameContent.EntityBehaviorHealth>();
 
             if (healthBehavior != null && form == Forms.WereWolf && night)
             {
-                // Add regen safely, capped at MaxHealth
+                // adds regen safely, capped at MaxHealth
                 healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + WereWolfModSettings.NightRegen);
 
 
@@ -204,7 +237,7 @@ namespace VintageStoryHarmony
             }
         }
 
-             private void ValidateConfig()
+        private void ValidateConfig()
         {
 
             if (Config == null) return;
@@ -234,13 +267,27 @@ namespace VintageStoryHarmony
             Config.WereWolfAnimalLootDropRate = Math.Clamp(Config.WereWolfAnimalLootDropRate, 0f, 10f);
             Config.WereWolfAnimalHarvestingTime = Math.Clamp(Config.WereWolfAnimalHarvestingTime, 0f, 30f);
             Config.WereWolfBowDrawingStrength = Math.Clamp(Config.WereWolfBowDrawingStrength, 0f, 10f);
+            Config.WereWolfEnabledMinBrightness = Math.Clamp(Config.WereWolfEnabledMinBrightness, 0f, 1f);
         }
+        
+
+
 
     }
     }
+
 
 
     
+
+
+
+
+
+
+
+
+
 
 
 
