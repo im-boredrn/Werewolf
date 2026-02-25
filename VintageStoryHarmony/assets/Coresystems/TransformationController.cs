@@ -20,12 +20,10 @@ namespace WereWolf.assets.Coresystems
         private static bool debugMode = false;
         public static void TrySetForm(IServerPlayer player, Forms targetForm, TransformationReason reason)
         {
-
             var entity = player.Entity;
             var infection = entity.GetBehavior<EntityBehaviorInfection>();
             var tree = entity.WatchedAttributes;
             entity.World.Logger.Warning($"TrySetForm called | Player: {player.PlayerName} | TargetForm: {targetForm} | Reason: {reason}");
-
 
             // 1️ Infection requirement
             if (infection == null || (infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected && reason == TransformationReason.ManualToggle))
@@ -38,7 +36,7 @@ namespace WereWolf.assets.Coresystems
 
             var currentForm = PlayerData.GetForm(entity);
             entity.World.Logger.Warning($"Current form: {currentForm}");
-            if (reason == TransformationReason.ManualToggle && !IsCooldownReady(entity)) return;
+            if (reason == TransformationReason.ManualToggle && !IsCooldownReady(entity)) return;          
             
             
 
@@ -54,8 +52,6 @@ namespace WereWolf.assets.Coresystems
             }
             SetCooldown(entity);
 
-
-
             // 5 Store state
             tree.SetString("manualForm", targetForm.ToString());
             tree.SetBool("manualFormActive", reason == TransformationReason.ManualToggle);
@@ -63,49 +59,39 @@ namespace WereWolf.assets.Coresystems
             entity.MarkTagsDirty();
             entity.World.Logger.Warning($"TrySetForm applied: {targetForm} | ManualActive: {reason == TransformationReason.ManualToggle}");
         }
-            
-        public static void ProcessTransformation( IServerPlayer player)
-        {
 
+        public static void ProcessTransformation(IServerPlayer player)
+        {
             var entity = player.Entity;
             if (entity == null) return;
 
-            // Don't auto-transform if a manual override is active
-            bool manualActive = player.Entity?.WatchedAttributes.GetBool("manualFormActive", false) ?? false;
-            if (debugMode)
-            {
-                player.Entity?.World.Logger.Warning($"ProcessTransformation called | ManualActive = {manualActive}");
-            }
+            bool manualActive = entity.WatchedAttributes.GetBool("manualFormActive", false);
             if (manualActive) return;
 
-
-
-            // Only auto-transform infected players
             var infection = entity.GetBehavior<EntityBehaviorInfection>();
-            if (infection == null || infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected) return;
+            if (infection == null || infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected)
+                return;
 
             bool isNight = WolfTime.isNight(entity);
-            // Determine target form based on night/day
-            PlayerData.Forms decidedForm = isNight ? Forms.WereWolf : Forms.VulpisHuman; // if its night you're a werewolf if not you are a vulpishuman I will have t o make more mallable with parameters later I think
+            Forms decidedForm = isNight ? Forms.WereWolf : Forms.VulpisHuman;
 
-            // Apply transformation if not already in the target form
-            if (PlayerData.GetForm(entity) != decidedForm)
+            Forms currentForm = PlayerData.GetForm(entity);
+
+            // 1️ Handle transformation if needed
+            if (currentForm != decidedForm)
             {
-                // Save to watched attributes (this is save slot)
                 TrySetForm(player, decidedForm, TransformationReason.Auto);
-
-                // Apply stats using the decided form
-
                 Stats.ApplyStats(entity, decidedForm);
-                Stats.ApplyRegen(entity, decidedForm);
-                if (debugMode)
-                {
-                   entity.World.Logger.Warning($"Stats applied for {decidedForm} | Regen applied for {entity}");
-                }
+                currentForm = decidedForm; // update local value
             }
 
+            // 2️ ALWAYS apply regen every tick
+
+            float regen = Stats.GetRegenAmount(entity, currentForm);
+            float deltaSeconds = entity.World.ElapsedMilliseconds; // or equivalent server delta
+            regen *= deltaSeconds;
+            Stats.ApplyRegen(entity, regen);
         }
-        
              public static bool IsCooldownReady(EntityPlayer player)
         {
             long lastTransformTick = player.WatchedAttributes.GetLong("lastTransformTick", 0);
@@ -117,15 +103,6 @@ namespace WereWolf.assets.Coresystems
         {
             player.WatchedAttributes.SetLong("lastTransformTick", player.World.ElapsedMilliseconds);
             player.WatchedAttributes.MarkPathDirty("lastTransformTick");
-        }
-
-            
-           
-
-        }
-
-
-        
-        }
-    
-
+        }    
+    }
+}

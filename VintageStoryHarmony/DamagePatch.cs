@@ -21,47 +21,61 @@ namespace VintageStoryHarmony
         {
             if (__instance == null || damageSource == null) return;
 
-            var attackerEntity = damageSource.SourceEntity;
-            var targetEntity = __instance;
+            // --- Identify target and attacker ---
+            Entity targetEntity = __instance;
+            Entity attackerEntity = damageSource.SourceEntity;
 
-            var attackerPlayer = attackerEntity as EntityPlayer;
-            var targetPlayer = targetEntity as EntityPlayer;
+            // --- Determine if target is a player ---
+            EntityPlayer targetPlayer = targetEntity as EntityPlayer;
+            Forms targetForm = targetPlayer != null ? PlayerData.GetForm(targetPlayer) : Forms.UnchangedHuman;
 
-            // Only get form if player exists
-            var attackerForm = PlayerData.Forms.VulpisHuman;
-            if (attackerPlayer != null)
-            {
-                attackerForm = PlayerData.GetForm(attackerPlayer);
-            }
+            // --- Determine if attacker is a player ---
+            EntityPlayer attackerPlayer = attackerEntity as EntityPlayer;
+            Forms attackerForm = attackerPlayer != null ? PlayerData.GetForm(attackerPlayer) : Forms.UnchangedHuman;
 
-            var targetForm = PlayerData.Forms.VulpisHuman;
-            if (targetPlayer != null)
-            {
-                targetForm = PlayerData.GetForm(targetPlayer);
-            }
+            // --- Determine if attacker is an NPC ---
+            bool attackerIsWolf = attackerEntity != null && attackerEntity.Code?.Path.Contains("wolf") == true;
+            bool targetIsWolf = targetEntity != null && targetEntity.Code?.Path.Contains("wolf") == true;
+
+            // --- Determine attacker/receiver type ---
+            string attackerType = attackerPlayer != null ? "Player" :
+                                  attackerIsWolf ? "WolfNPC" :
+                                  "Other";
+
+            string targetType = targetPlayer != null ? "Player" :
+                                targetIsWolf ? "WolfNPC" :
+                                "Other";
 
             bool isNight = __instance.World.Calendar.HourOfDay >= 18 || __instance.World.Calendar.HourOfDay < 6;
 
             // 1. Fall damage only affects Werewolf players
-            if (targetForm == PlayerData.Forms.WereWolf &&
-                damageSource.Source == EnumDamageSource.Fall &&
-                WereWolfModSettings.DisableFallDamage)
+            if (targetForm == Forms.WereWolf && damageSource.Source == EnumDamageSource.Fall && WereWolfModSettings.DisableFallDamage)
             {
                 damage = 0f;
                 return;
             }
 
-            // 2. Wolf-player immunity
-            string targetCode = targetEntity.Code?.ToString() ?? "unknown";
-            string attackerCode = attackerEntity?.Code?.ToString() ?? "unknown";
 
-            if ((attackerPlayer != null && targetCode == "wolf") ||
-                (attackerCode == "wolf" && targetPlayer != null))
+
+            // Wolf vs player immunity
+            bool targetIsPlayer = targetPlayer != null;
+            bool attackerIsPlayer = attackerPlayer != null;
+            bool targetIsWereWolf = targetForm == Forms.WereWolf;
+            bool targetIsVulpisHuman = targetForm == Forms.VulpisHuman;
+            bool attackerIsWereWolf = attackerForm == Forms.WereWolf;
+            bool attackerIsVulpis = attackerForm == Forms.VulpisHuman;
+
+
+            if ((attackerIsWereWolf || attackerIsVulpis) && targetIsWolf) // If attacker wolf related and target is wolf
             {
-                if (targetForm != Forms.WereWolf) return;
                 damage = 0f;
-                return;
             }
+            else if (attackerIsWolf && (targetIsVulpisHuman || targetIsWereWolf)) // If attacker is wolf and target is wolf related
+            {
+                damage = 0f;
+            }
+           
+            
 
             // 3. Base multiplier
             float multiplier = 1f;
@@ -69,54 +83,40 @@ namespace VintageStoryHarmony
 
 
 
-            if (attackerPlayer == null) // Non-player attacker
+            if (!attackerIsPlayer && targetIsWereWolf) // Non-player attacker
             {
                     if (targetForm == Forms.WereWolf) // Player is WereWolf
                     {
                         multiplier *= WereWolfModSettings.DamageReduction;
                     }
             }
-            else // Player attacker
+            else if (attackerIsWereWolf)              // WereWolf attacker
             {
-                if (attackerForm == PlayerData.Forms.WereWolf)
+             
                     multiplier *= WereWolfModSettings.Damage;
             }
 
             // 4. Daytime penalty
-            if (!isNight) multiplier *= 0.5f;
+            if (!isNight && attackerIsWereWolf) multiplier *= 0.5f;
 
             // 5. Apply final damage
             damage *= multiplier;
 
-            if (attackerForm == Forms.WereWolf)
+            if (attackerIsWereWolf)
             {
            // PlaySound
             }
 
             // Debug
-            if (attackerPlayer != null)
-{
-                Console.WriteLine($"Form: {attackerForm}, DamageMultiplier: {WereWolfModSettings.Damage}, FinalDamage: {damage}");
-}
+            if (attackerIsPlayer)
+            {
+                Console.WriteLine($"Form: {attackerForm} | DamageMultiplier: {WereWolfModSettings.Damage} | FinalDamage: {damage}");
+            }
+            else if (!attackerIsPlayer)
+            {
+                Console.WriteLine($"PlayerForm: {targetForm} | Attacker: {attackerType} | DamageReduction: {WereWolfModSettings.DamageReduction} | FinalDamage: {damage}");
 
-
-
-          
-
-           
+            }
         }
     }
 }
-    
-
-
-                
-                    
-                
-            
-
-      
-        
-    
-   
-

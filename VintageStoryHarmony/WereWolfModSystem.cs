@@ -237,7 +237,7 @@ namespace VintageStoryHarmony
                 bool night = WolfTime.isNight(entity);
                 bool day = !night;
 
-                var form = PlayerData.GetForm(entity);
+                var beastform = PlayerData.GetForm(entity);
                 // Safe logging
                 // LOG SPAMMERS JUST FOR TESTING  sapi?.Logger.Warning($"Hour: {entity.World.Calendar?.HourOfDay ?? -1} | Night: {night}");
 
@@ -245,7 +245,6 @@ namespace VintageStoryHarmony
              
 
                 TransformationController.ProcessTransformation(player);
-
 
 
 

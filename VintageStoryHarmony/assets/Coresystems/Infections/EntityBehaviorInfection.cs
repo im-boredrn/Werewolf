@@ -7,6 +7,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using Vintagestory.Server;
 using static WereWolf.assets.Coresystems.PlayerData;
 
 namespace WereWolf.assets.Coresystems.Infections
@@ -16,6 +17,7 @@ namespace WereWolf.assets.Coresystems.Infections
     {
         private bool DebugMode = false; // For Debug Mode 
         private EntityPlayer Player => (EntityPlayer)entity; // assignment operator is saying assign the value on the left to the value on the right.
+        private ServerPlayer ServerPlayer => (ServerPlayer)ServerPlayer;
         public EntityBehaviorInfection(Entity entity) : base(entity) // no need to pass Entityplayer entity anymore since we are attaching it to them.
         {
             if (entity.HasBehavior<EntityBehaviorInfection>()) return;
@@ -152,7 +154,7 @@ namespace WereWolf.assets.Coresystems.Infections
             {
                 sapi?.Logger.Warning($"Attacker: {attackerCode}, Level: {currentLevel}");
 
-                sapi.Logger.Warning(
+                sapi?.Logger.Warning(
     $"Hit by: {attacker?.Code?.Path ?? "null"}, PrevLvl: {previousLevel}, NewLvl: {currentLevel}, Threshold: {InfectionThreshold}, Status: {CurrentInfection()}");
             }
 
@@ -173,7 +175,7 @@ namespace WereWolf.assets.Coresystems.Infections
 
             if (GetInfection() == Infectionstatus.Infected && form == Forms.UnchangedHuman)
             {
-                SetForm(Player, Forms.VulpisHuman);
+                TransformationController.TrySetForm(ServerPlayer, Forms.VulpisHuman, TransformationReason.InfectionCycle); 
             }
             if (DebugMode)
                 sapi?.Logger.Warning($"Processing infection. Status: {GetInfection()}");
@@ -191,8 +193,8 @@ namespace WereWolf.assets.Coresystems.Infections
             //   First tick of night > transform infected human to wolf
             if (GetInfection() == Infectionstatus.Infected && GetForm(Player) == Forms.VulpisHuman)
                 {
-                   SetForm(Player, Forms.WereWolf);
-              }
+                    TransformationController.TrySetForm(ServerPlayer, Forms.WereWolf, TransformationReason.InfectionCycle);
+                }
             }
             // ALWAYS update tracker
             Player.WatchedAttributes.SetBool(WasNightKey, currentNight);

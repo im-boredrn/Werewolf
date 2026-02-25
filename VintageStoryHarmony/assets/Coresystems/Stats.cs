@@ -22,8 +22,12 @@ namespace WereWolf.assets.Coresystems
 
             var stat = player.Stats;
 
-            //save old max before applying
-            float oldMax = stat.GetBlended("maxhealthExtraPoints");
+            var healthBehavior = player.GetBehavior<EntityBehaviorHealth>();
+
+            // Save old max health (total) to scale properly
+            float oldMax = healthBehavior?.MaxHealth ?? 20f; // fallback to default health
+            float oldHealth = healthBehavior?.Health ?? oldMax;
+
 
             if (form == PlayerData.Forms.WereWolf) // all stats run fine except for maxhealth, its weird rn
             {
@@ -76,42 +80,47 @@ namespace WereWolf.assets.Coresystems
                 stat.Remove("bowDrawingStrength", "werewolfmod");
             }
 
-            // Health behavior: scale current health based on new max
-            var healthBehavior = player.GetBehavior<EntityBehaviorHealth>(); // currerntly not working, or even calling as far as im concened
+
+            // Update health to match new max
             if (healthBehavior != null)
             {
-                float newMax = stat.GetBlended("maxhealthExtraPoints");
-                float oldHealth = healthBehavior.Health;
-
-                float oldPercent = oldMax > 0 ? healthBehavior.Health / oldMax : 1f;
-              //  changes health
+                float newMax = healthBehavior.MaxHealth;
+                float oldPercent = oldMax > 0 ? oldHealth / oldMax : 1f;
                 healthBehavior.Health = Math.Min(newMax, newMax * oldPercent);
-
                 healthBehavior.MarkDirty();
             }
         }
 
-        // call this per tick to apply regen should be done automatically
-        public static void ApplyRegen(EntityPlayer entity, PlayerData.Forms form) // currerntly not working, or even calling as far as im concened
-        {
-            bool night = WolfTime.isNight(entity);
-            var healthBehavior = entity?.GetBehavior<EntityBehaviorHealth>();
+        // Apply regen per tick
 
+        public static float GetRegenAmount(EntityPlayer player, PlayerData.Forms form)
+        {
+            if (form != PlayerData.Forms.WereWolf) return 0f;
+
+            bool night = WolfTime.isNight(player);
+            return night ? WereWolfModSettings.NightRegen : WereWolfModSettings.DayRegen;
+        }
+
+        public static void ApplyRegen(EntityPlayer player, float regenAmount)
+        {
+            if (player == null ||  regenAmount <= 0f) return;
+
+            var healthBehavior = player.GetBehavior<EntityBehaviorHealth>();
             if (healthBehavior == null) return;
 
-            // Only apply regen if WereWolf form
-            if (form == PlayerData.Forms.WereWolf)
-            {
-                float regenAmount = night ? WereWolfModSettings.NightRegen : WereWolfModSettings.DayRegen;
-                healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + regenAmount);
-                healthBehavior.MarkDirty();
-                entity?.World.Logger.Warning($"Regen check | Form: {form} | Night: {night}");
-            }
-            entity?.World.Logger.Warning($"Regen check | Form: {form} | Night: {night}");
+            bool night = WolfTime.isNight(player);
+            
 
+            healthBehavior.Health = Math.Min(
+          healthBehavior.MaxHealth,
+          healthBehavior.Health + regenAmount
+      );
+            healthBehavior.MarkDirty();
+
+            }
         }
     }
-}
+
 
         
             
