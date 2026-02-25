@@ -58,6 +58,7 @@ namespace VintageStoryHarmony
             if ((attackerPlayer != null && targetCode == "wolf") ||
                 (attackerCode == "wolf" && targetPlayer != null))
             {
+                if (targetForm != Forms.WereWolf) return;
                 damage = 0f;
                 return;
             }

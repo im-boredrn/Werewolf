@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Linq;
 using Vintagestory.API.Common;
 
 namespace CakeBuild
@@ -74,14 +75,28 @@ namespace CakeBuild
     {
         public override void Run(BuildContext context)
         {
-            context.DotNetClean($"../{BuildContext.ProjectName}/{BuildContext.ProjectName}.csproj",
+            // Resolve the .csproj dynamically in the project directory to avoid hardcoded names.
+            var projectDir = Path.Combine("..", BuildContext.ProjectName);
+            if (!Directory.Exists(projectDir))
+            {
+                throw new CakeException($"Project directory not found: '{projectDir}'.");
+            }
+
+            var projPath = Directory.EnumerateFiles(projectDir, "*.csproj", SearchOption.TopDirectoryOnly)
+                                   .FirstOrDefault();
+            if (projPath == null)
+            {
+                throw new CakeException($"No .csproj found in '{projectDir}'. Rename the project or place a .csproj there.");
+            }
+
+            // Use the discovered project path for clean and publish.
+            context.DotNetClean(projPath,
                 new DotNetCleanSettings
                 {
                     Configuration = context.BuildConfiguration
                 });
 
-
-            context.DotNetPublish($"../{BuildContext.ProjectName}/{BuildContext.ProjectName}.csproj",
+            context.DotNetPublish(projPath,
                 new DotNetPublishSettings
                 {
                     Configuration = context.BuildConfiguration

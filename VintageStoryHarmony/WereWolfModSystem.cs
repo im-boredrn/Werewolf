@@ -13,9 +13,9 @@ using Vintagestory.API.Server;
 using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
 using WereWolf.assets.Coresystems;
+using WereWolf.assets.Coresystems.Infections;
 using WereWolf.assets.Keybinds;
 using WereWolf.assets.Werewolf.Configuration;
-using static WereWolf.assets.Coresystems.Infection;
 using static WereWolf.assets.Coresystems.PlayerData;
 
 namespace VintageStoryHarmony
@@ -37,7 +37,6 @@ namespace VintageStoryHarmony
         private Forms lastForm;
         private bool initialized = false;
 
-        public bool WasNight = false; 
 
         public static WerewolfConfig? Config;
 
@@ -56,7 +55,6 @@ namespace VintageStoryHarmony
 
         public override void Start(ICoreAPI api)
         {
-
 
             Instance = this;
 
@@ -147,20 +145,28 @@ namespace VintageStoryHarmony
             sapi = api;
             // Tick Listener
             tickListenerId = api.Event.RegisterGameTickListener(OnServerTick, 1000);
-       //     api.Event.onattack
             api.Logger.Notification($"WEREWOLF CONFIG LOADED");
 
-           serverChannel = sapi.Network.RegisterChannel("werewolf:toggleform")
-      .RegisterMessageType<ToggleFormPacket>()
-      .SetMessageHandler<ToggleFormPacket>((player, packet) =>
-      {
+            serverChannel = sapi.Network.RegisterChannel("werewolf:toggleform")
+       .RegisterMessageType<ToggleFormPacket>()
+       .SetMessageHandler<ToggleFormPacket>((player, packet) =>
+       {
 
-          TransformationController.TrySetForm(player, packet.TargetForm, TransformationReason.ManualToggle);
-          sapi.Logger.Warning($"Server received toggle packet. TargetForm = {packet.TargetForm}");
+           TransformationController.TrySetForm(player, packet.TargetForm, TransformationReason.ManualToggle);
+           sapi.Logger.Warning($"Server received toggle packet. TargetForm = {packet.TargetForm}");
 
-      });
+       });
 
+            api.Event.PlayerJoin += (IServerPlayer player) =>
+            {
+                // Only attach if not already attached
+                if (!player.Entity.HasBehavior<EntityBehaviorInfection>())
+                {
+                    player.Entity.AddBehavior(new EntityBehaviorInfection(player.Entity));
+                    (api as ICoreServerAPI)?.Logger.Notification($"Infection behavior attached to {player.PlayerName}");
+                }
 
+            };
         }
 
 
@@ -168,14 +174,14 @@ namespace VintageStoryHarmony
 
         {
             Capi = api;
-           
+
 
             api.Logger.Warning($"KEYBIND ran on: {api.Side}");
 
 
-             clienttickListenerId = api.Event.RegisterGameTickListener(OnClientTick, 1000);   // client tick listener
-           
-             api.Input.RegisterHotKey("toggleform", "Toggle Form", GlKeys.G, HotkeyType.CharacterControls);
+            clienttickListenerId = api.Event.RegisterGameTickListener(OnClientTick, 1000);   // client tick listener
+
+            api.Input.RegisterHotKey("toggleform", "Toggle Form", GlKeys.G, HotkeyType.CharacterControls);
 
             api.Input.SetHotKeyHandler("toggleform", (G) =>
             {
@@ -206,9 +212,9 @@ namespace VintageStoryHarmony
                 return true; // key handled / consumed
 
             });
-            
-         clientChannel =   Capi.Network.RegisterChannel("werewolf:toggleform")
-                .RegisterMessageType<ToggleFormPacket>();
+
+            clientChannel = Capi.Network.RegisterChannel("werewolf:toggleform")
+                   .RegisterMessageType<ToggleFormPacket>();
 
 
             // api.Event.RegisterRenderer(wolfVisionRenderer, EnumRenderStage.AfterPostProcessing, "WolfVision", 0.85, 0.85, typeof(WolfVisionRenderer));
@@ -233,20 +239,15 @@ namespace VintageStoryHarmony
                 // LOG SPAMMERS JUST FOR TESTING  sapi?.Logger.Warning($"Hour: {entity.World.Calendar?.HourOfDay ?? -1} | Night: {night}");
 
                 entity.World.Logger.Warning($"SERVER sees form: {PlayerData.GetForm(entity)}");
-
-                Infection.ProcessInfection(entity);
-
-                InfectionNight(entity);
+             
 
                 TransformationController.ProcessTransformation(player);
 
-                entity.World.Logger.Warning($"Current InfectionLevel is : {Infection.GetInfectionLevel(entity)} | CurrentInfectionStatus is: {Infection.GetInfection(entity)}");
-               
 
 
-            //    ApplyRegenPure(entity, 1f);
-            // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
-            // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
+
+                // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
+                // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
 
 
 
@@ -258,26 +259,6 @@ namespace VintageStoryHarmony
 
 
 
-        }
-
-        public static void ApplyRegenPure(EntityPlayer player, float regenAmount)
-        {
-            if (player == null) return;
-
-            var healthBehavior = player.GetBehavior<Vintagestory.GameContent.EntityBehaviorHealth>();
-            if (healthBehavior == null)
-            {
-                player.World.Logger.Warning($"ApplyRegenPure: No HealthBehavior found for {player.GetName}");
-                return;
-            }
-
-            float oldHealth = healthBehavior.Health;
-            healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + regenAmount);
-            healthBehavior.MarkDirty();
-
-            player.World.Logger.Warning(
-                $"ApplyRegenPure: {player} | Old Health: {oldHealth} | New Health: {healthBehavior.Health} | Max: {healthBehavior.MaxHealth}"
-            );
         }
         private void OnClientTick(float dt)
         {
@@ -313,24 +294,13 @@ namespace VintageStoryHarmony
             var packet = new ToggleFormPacket { TargetForm = targetForm };
             Capi?.Logger.Warning($"Sending toggle form packet. TargetForm = {targetForm}");
 
-            clientChannel?.SendPacket(packet); }
-
-        private void InfectionNight(EntityPlayer entity)
-        {
-            bool currentNight = WolfTime.isNight(entity);
-
-            if (!WasNight && currentNight)
-            {
-                // First tick of night > transform infected human to wolf
-                if (GetInfection(entity) == Infectionstatus.Infected && GetForm(entity) == Forms.VulpisHuman)
-                {
-                    SetForm(entity, Forms.WereWolf);
-                }
-            }
-
-            // update tracker
-            WasNight = currentNight;
+            clientChannel?.SendPacket(packet); 
         }
+    
+
+        
+        
+        
 
 
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Vintagestory.API.Common;
@@ -8,6 +9,7 @@ using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using VintageStoryHarmony;
+using WereWolf.assets.Coresystems.Infections;
 using WereWolf.assets.Werewolf.Configuration;
 using static WereWolf.assets.Coresystems.PlayerData;
 
@@ -15,6 +17,7 @@ namespace WereWolf.assets.Coresystems
 {
     internal class TransformationController
     {
+        private static bool debugMode = false;
         public static void TrySetForm(IServerPlayer player, Forms targetForm, TransformationReason reason)
         {
             var entity = player.Entity;
@@ -43,7 +46,11 @@ namespace WereWolf.assets.Coresystems
 
             // 4️ Apply transformation
             SetForm(entity, targetForm);
-            entity.World.Logger.Warning($"Form set to {targetForm}");
+            if(debugMode)
+            {
+                entity.World.Logger.Warning($"Form set to {targetForm}");
+
+            }
 
 
 
@@ -63,11 +70,17 @@ namespace WereWolf.assets.Coresystems
 
             // Don't auto-transform if a manual override is active
             bool manualActive = player.Entity?.WatchedAttributes.GetBool("manualFormActive", false) ?? false;
-            player.Entity?.World.Logger.Warning($"ProcessTransformation called | ManualActive = {manualActive}");
+            if (debugMode)
+            {
+                player.Entity?.World.Logger.Warning($"ProcessTransformation called | ManualActive = {manualActive}");
+            }
             if (manualActive) return;
 
+
+
             // Only auto-transform infected players
-            if (Infection.CurrentInfection(entity) != Infection.Infectionstatus.Infected) return;
+            var infection = new EntityBehaviorInfection(entity);
+            if (infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected) return;
 
             bool isNight = WolfTime.isNight(entity);
             // Determine target form based on night/day
@@ -83,9 +96,10 @@ namespace WereWolf.assets.Coresystems
 
                 Stats.ApplyStats(entity, decidedForm);
                 Stats.ApplyRegen(entity, decidedForm);
-                entity.World.Logger.Warning($"Stats applied for {decidedForm} | Regen applied for {entity}");
-
-
+                if (debugMode)
+                {
+                   entity.World.Logger.Warning($"Stats applied for {decidedForm} | Regen applied for {entity}");
+                }
             }
 
         }
