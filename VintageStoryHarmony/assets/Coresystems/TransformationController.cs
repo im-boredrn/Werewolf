@@ -20,14 +20,15 @@ namespace WereWolf.assets.Coresystems
         private static bool debugMode = false;
         public static void TrySetForm(IServerPlayer player, Forms targetForm, TransformationReason reason)
         {
+
             var entity = player.Entity;
+            var infection = entity.GetBehavior<EntityBehaviorInfection>();
             var tree = entity.WatchedAttributes;
             entity.World.Logger.Warning($"TrySetForm called | Player: {player.PlayerName} | TargetForm: {targetForm} | Reason: {reason}");
 
-            bool infected = tree.GetBool("infected");
 
             // 1️ Infection requirement
-            if (!infected && reason == TransformationReason.ManualToggle)
+            if (infection == null || (infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected && reason == TransformationReason.ManualToggle))
             {
                 player.SendMessage(GlobalConstants.GeneralChatGroup, "You are not infected.", EnumChatType.Notification);
                 return;
@@ -51,6 +52,7 @@ namespace WereWolf.assets.Coresystems
                 entity.World.Logger.Warning($"Form set to {targetForm}");
 
             }
+            SetCooldown(entity);
 
 
 
@@ -79,8 +81,8 @@ namespace WereWolf.assets.Coresystems
 
 
             // Only auto-transform infected players
-            var infection = new EntityBehaviorInfection(entity);
-            if (infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected) return;
+            var infection = entity.GetBehavior<EntityBehaviorInfection>();
+            if (infection == null || infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected) return;
 
             bool isNight = WolfTime.isNight(entity);
             // Determine target form based on night/day
@@ -104,7 +106,7 @@ namespace WereWolf.assets.Coresystems
 
         }
         
-             public static bool IsCooldownReady(Entity player)
+             public static bool IsCooldownReady(EntityPlayer player)
         {
             long lastTransformTick = player.WatchedAttributes.GetLong("lastTransformTick", 0);
             long currentTick = player.World.ElapsedMilliseconds;

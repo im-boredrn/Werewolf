@@ -14,7 +14,7 @@ namespace WereWolf.assets.Coresystems.Infections
 
     internal class EntityBehaviorInfection : EntityBehavior
     {
-        private bool DebugMode = true; // For Debug Mode 
+        private bool DebugMode = false; // For Debug Mode 
         private EntityPlayer Player => (EntityPlayer)entity; // assignment operator is saying assign the value on the left to the value on the right.
         public EntityBehaviorInfection(Entity entity) : base(entity) // no need to pass Entityplayer entity anymore since we are attaching it to them.
         {
@@ -121,7 +121,7 @@ namespace WereWolf.assets.Coresystems.Infections
             int previousLevel = currentLevel;
 
             // Example: only wolves cause infection
-            if (attacker.Code.Path.Contains("wolf"))
+            if (attacker.Code?.Path.Contains("wolf") == true)
             {
                 currentLevel = Math.Min(currentLevel + amount, 100);
                 SetInfectionLevel(currentLevel);

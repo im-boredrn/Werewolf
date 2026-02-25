@@ -64,7 +64,6 @@ namespace VintageStoryHarmony
 
             base.Start(api);
 
-            Mod.Logger.Notification("WEREWOLF MOD LOADED!");
 
             //Shader Loading
 
@@ -142,6 +141,8 @@ namespace VintageStoryHarmony
 
         public override void StartServerSide(ICoreServerAPI api) // SERVER SIDE
         {
+            Mod.Logger.Notification("Server:WEREWOLF MOD LOADED !");
+
             sapi = api;
             // Tick Listener
             tickListenerId = api.Event.RegisterGameTickListener(OnServerTick, 1000);
@@ -173,6 +174,8 @@ namespace VintageStoryHarmony
         public override void StartClientSide(ICoreClientAPI api) // CLIENT SIDE
 
         {
+            Mod.Logger.Notification("Client:WEREWOLF MOD LOADED !");
+
             Capi = api;
 
 
