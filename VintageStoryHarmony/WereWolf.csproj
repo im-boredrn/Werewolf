@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="protobuf-net">
+      <HintPath>E:\Vintagestory\Lib\protobuf-net.dll</HintPath>
+	<Private>false</Private>
+	</Reference>
     <Reference Include="VintagestoryAPI">
       <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
       <Private>false</Private>

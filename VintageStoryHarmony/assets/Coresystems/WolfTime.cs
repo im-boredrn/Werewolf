@@ -5,21 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Vintagestory.API.Common.Entities;
 
-namespace WereWolf.assets.Werewolf
+namespace WereWolf.assets.Coresystems
 {
     internal class WolfTime
     {
         public static bool isNight(Entity entity)
         {
-            var time = entity?.World?.Calendar.HourOfDay;
+            var hour = entity?.World?.Calendar.HourOfDay ?? 0; // fallback in case entity/world is null
+            return (hour >= 18 || hour <= 6);
 
-            if (time >= 18 || time <= 6)
-            {
-                return true;
-            }
-            else return false;
-           
-           
+
         }
 
       

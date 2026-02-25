@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
 using System;
 using System.IO;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Vintagestory;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -10,11 +12,11 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
-using VintageStoryHarmony.assets;
+using WereWolf.assets.Coresystems;
 using WereWolf.assets.Keybinds;
-using WereWolf.assets.Werewolf;
 using WereWolf.assets.Werewolf.Configuration;
-using static VintageStoryHarmony.assets.PlayerData;
+using static WereWolf.assets.Coresystems.Infection;
+using static WereWolf.assets.Coresystems.PlayerData;
 
 namespace VintageStoryHarmony
 {
@@ -29,15 +31,20 @@ namespace VintageStoryHarmony
 
         private ICoreServerAPI? sapi;
         private long tickListenerId;
+        private long clienttickListenerId;
         public bool ManualFormActive = false;
         public Forms ManualForm;
+        private Forms lastForm;
+        private bool initialized = false;
 
-        private bool wolfVisionEnabled = false;
-
+        public bool WasNight = false; 
 
         public static WerewolfConfig? Config;
 
         public static WereWolfModSystem? Instance; // optional for easy access
+
+        private IClientNetworkChannel? clientChannel;
+        private IServerNetworkChannel? serverChannel;
 
 
 
@@ -45,7 +52,7 @@ namespace VintageStoryHarmony
         public const string PLUGIN_GUID = "kortah.werewolf";
         public const string PLUGIN_NAME = "Werewolf!";
 
-       // private WolfVisionRenderer? wolfVisionRenderer;
+        // private WolfVisionRenderer? wolfVisionRenderer;
 
         public override void Start(ICoreAPI api)
         {
@@ -63,7 +70,7 @@ namespace VintageStoryHarmony
 
             //Shader Loading
 
-            
+
 
 
 
@@ -135,42 +142,78 @@ namespace VintageStoryHarmony
 
 
 
-        public override void StartServerSide(ICoreServerAPI api)
+        public override void StartServerSide(ICoreServerAPI api) // SERVER SIDE
         {
-            Mod.Logger.Notification("Hello from template mod server side: " + Lang.Get("vintagestoryharmony:hello"));
-
-
-
             sapi = api;
             // Tick Listener
             tickListenerId = api.Event.RegisterGameTickListener(OnServerTick, 1000);
-
+       //     api.Event.onattack
             api.Logger.Notification($"WEREWOLF CONFIG LOADED");
+
+           serverChannel = sapi.Network.RegisterChannel("werewolf:toggleform")
+      .RegisterMessageType<ToggleFormPacket>()
+      .SetMessageHandler<ToggleFormPacket>((player, packet) =>
+      {
+
+          TransformationController.TrySetForm(player, packet.TargetForm, TransformationReason.ManualToggle);
+          sapi.Logger.Warning($"Server received toggle packet. TargetForm = {packet.TargetForm}");
+
+      });
+
+
         }
 
 
-        public override void StartClientSide(ICoreClientAPI api)
+        public override void StartClientSide(ICoreClientAPI api) // CLIENT SIDE
 
         {
             Capi = api;
+           
 
             api.Logger.Warning($"KEYBIND ran on: {api.Side}");
 
-            api.Input.RegisterHotKey("togglewerewolf", "Toggle Werewolf Form", GlKeys.G, HotkeyType.CharacterControls);
-            api.Input.SetHotKeyHandler("togglewerewolf", Keybind.OnKeybindPress);
-         //   wolfVisionRenderer = new WolfVisionRenderer(api);
 
+             clienttickListenerId = api.Event.RegisterGameTickListener(OnClientTick, 1000);   // client tick listener
+           
+             api.Input.RegisterHotKey("toggleform", "Toggle Form", GlKeys.G, HotkeyType.CharacterControls);
 
-            //if (wolfVisionRenderer == null)
+            api.Input.SetHotKeyHandler("toggleform", (G) =>
             {
-                return;
-            }
-           // api.Input.RegisterHotKey("togglewolfvision", "Toggle WolfVision", GlKeys.V, HotkeyType.CharacterControls);
+                api.Logger.Warning("Keybind pressed!");
 
-            //api.Input.SetHotKeyHandler("togglewolfvision", wolfVisionRenderer.Toggle);
+                var entity = api.World.Player?.Entity;
+                if (entity == null)
+                {
+                    api.Logger.Warning("Keybind pressed but entity is null!");
+                    return false;
+                }
+
+                api.Logger.Warning("Keybind pressed! Player entity detected.");
+                // Determine target form: toggle between WereWolf and VulpisHuman
+                var currentForm = PlayerData.GetForm(entity);
+                var targetForm = currentForm == PlayerData.Forms.WereWolf
+                                 ? PlayerData.Forms.VulpisHuman
+                                 : PlayerData.Forms.WereWolf;
+
+                api.Logger.Warning($"Determined target form: {targetForm}");
+
+
+                // Send packet to server requesting transformation
+                SendToggleFormPacket(targetForm);
+
+                api.Logger.Warning($"Sending toggle form packet. TargetForm = {targetForm}");
+
+                return true; // key handled / consumed
+
+            });
             
-            // Fixed: the overload expects a System.Type as the 6th parameter, not a bool.
-           // api.Event.RegisterRenderer(wolfVisionRenderer, EnumRenderStage.AfterPostProcessing, "WolfVision", 0.85, 0.85, typeof(WolfVisionRenderer));
+         clientChannel =   Capi.Network.RegisterChannel("werewolf:toggleform")
+                .RegisterMessageType<ToggleFormPacket>();
+
+
+            // api.Event.RegisterRenderer(wolfVisionRenderer, EnumRenderStage.AfterPostProcessing, "WolfVision", 0.85, 0.85, typeof(WolfVisionRenderer));
+
+
 
 
         }
@@ -186,19 +229,24 @@ namespace VintageStoryHarmony
                 bool day = !night;
 
                 var form = PlayerData.GetForm(entity);
-
                 // Safe logging
                 // LOG SPAMMERS JUST FOR TESTING  sapi?.Logger.Warning($"Hour: {entity.World.Calendar?.HourOfDay ?? -1} | Night: {night}");
 
-                // Decide form based on night/day or manual toggle
-                Transform.Transformation(entity, entity);
-                // Regeneration For Wolf
+                entity.World.Logger.Warning($"SERVER sees form: {PlayerData.GetForm(entity)}");
+
+                Infection.ProcessInfection(entity);
+
+                InfectionNight(entity);
+
+                TransformationController.ProcessTransformation(player);
+
+                entity.World.Logger.Warning($"Current InfectionLevel is : {Infection.GetInfectionLevel(entity)} | CurrentInfectionStatus is: {Infection.GetInfection(entity)}");
+               
 
 
-                ApplyRegen(entity);
-
-                // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
-                // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
+            //    ApplyRegenPure(entity, 1f);
+            // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
+            // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
 
 
 
@@ -212,30 +260,83 @@ namespace VintageStoryHarmony
 
         }
 
-
-
-
-
-        private void ApplyRegen(EntityPlayer entity)
+        public static void ApplyRegenPure(EntityPlayer player, float regenAmount)
         {
-            var form = PlayerData.GetForm(entity);
-            bool night = WolfTime.isNight(entity);
+            if (player == null) return;
 
-            var healthBehavior = entity?.GetBehavior<Vintagestory.GameContent.EntityBehaviorHealth>();
-
-            if (healthBehavior != null && form == Forms.WereWolf && night)
+            var healthBehavior = player.GetBehavior<Vintagestory.GameContent.EntityBehaviorHealth>();
+            if (healthBehavior == null)
             {
-                // adds regen safely, capped at MaxHealth
-                healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + WereWolfModSettings.NightRegen);
-
-
+                player.World.Logger.Warning($"ApplyRegenPure: No HealthBehavior found for {player.GetName}");
+                return;
             }
-            else if (healthBehavior != null && form == Forms.WereWolf && !night)
-            {
-                healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + WereWolfModSettings.DayRegen);
 
-            }
+            float oldHealth = healthBehavior.Health;
+            healthBehavior.Health = Math.Min(healthBehavior.MaxHealth, healthBehavior.Health + regenAmount);
+            healthBehavior.MarkDirty();
+
+            player.World.Logger.Warning(
+                $"ApplyRegenPure: {player} | Old Health: {oldHealth} | New Health: {healthBehavior.Health} | Max: {healthBehavior.MaxHealth}"
+            );
         }
+        private void OnClientTick(float dt)
+        {
+            var mod = WereWolfModSystem.Instance;
+            var entity = mod?.Capi?.World.Player?.Entity as EntityPlayer;
+            if (entity == null) return;
+
+            var form = PlayerData.GetForm(entity);
+
+            if (!initialized)
+            {
+                lastForm = form;
+                initialized = true;
+                return;
+            }
+
+            if (form != lastForm)
+            {
+                if (form == Forms.WereWolf)
+                    PlayPlayerSound("sounds/werewolf/werewolf-transformation1", entity, 0.8f, 1f);
+                else
+                    PlayPlayerSound("sounds/human/human-transform1", entity, 1f, 1.1f);
+
+                lastForm = form;
+            }
+
+            Capi?.Logger.Warning($"CLIENT sees form: {form}");
+
+
+        }
+        void SendToggleFormPacket(PlayerData.Forms targetForm)
+        {
+            var packet = new ToggleFormPacket { TargetForm = targetForm };
+            Capi?.Logger.Warning($"Sending toggle form packet. TargetForm = {targetForm}");
+
+            clientChannel?.SendPacket(packet); }
+
+        private void InfectionNight(EntityPlayer entity)
+        {
+            bool currentNight = WolfTime.isNight(entity);
+
+            if (!WasNight && currentNight)
+            {
+                // First tick of night > transform infected human to wolf
+                if (GetInfection(entity) == Infectionstatus.Infected && GetForm(entity) == Forms.VulpisHuman)
+                {
+                    SetForm(entity, Forms.WereWolf);
+                }
+            }
+
+            // update tracker
+            WasNight = currentNight;
+        }
+
+
+
+
+
+        
 
         private void ValidateConfig()
         {
@@ -269,32 +370,27 @@ namespace VintageStoryHarmony
             Config.WereWolfBowDrawingStrength = Math.Clamp(Config.WereWolfBowDrawingStrength, 0f, 10f);
             Config.WereWolfEnabledMinBrightness = Math.Clamp(Config.WereWolfEnabledMinBrightness, 0f, 1f);
         }
-        
 
+      public void PlayPlayerSound(string soundCode, EntityPlayer entity, float pitchMin, float pitchMax)
+        {
+            var capi = WereWolfModSystem.Instance?.Capi;
+            var X = entity.Pos.X;
+            var Y = entity.Pos.Y;
+            var Z = entity.Pos.Z;
 
+            if (capi == null) return;
+         
+            float pitch = pitchMin + (float)capi.World.Rand.NextDouble() * (pitchMax - pitchMin);
+            
+            capi.World.PlaySoundAt(
+                   new AssetLocation("vulpis:" + soundCode),
+                   entity,
+                   null,
+                   false,
+                   16f,
+                   pitch
+                   );
 
+        }
     }
-    }
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}

@@ -6,10 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
-using VintageStoryHarmony.assets;
+using WereWolf.assets.Coresystems;
 using WereWolf.assets.Werewolf;
 using WereWolf.assets.Werewolf.Configuration;
-using static VintageStoryHarmony.assets.PlayerData;
+using static WereWolf.assets.Coresystems.PlayerData;
 
 namespace VintageStoryHarmony
 {
@@ -28,13 +28,13 @@ namespace VintageStoryHarmony
             var targetPlayer = targetEntity as EntityPlayer;
 
             // Only get form if player exists
-            var attackerForm = PlayerData.Forms.Human;
+            var attackerForm = PlayerData.Forms.VulpisHuman;
             if (attackerPlayer != null)
             {
                 attackerForm = PlayerData.GetForm(attackerPlayer);
             }
 
-            var targetForm = PlayerData.Forms.Human;
+            var targetForm = PlayerData.Forms.VulpisHuman;
             if (targetPlayer != null)
             {
                 targetForm = PlayerData.GetForm(targetPlayer);
@@ -87,7 +87,10 @@ namespace VintageStoryHarmony
             // 5. Apply final damage
             damage *= multiplier;
 
-
+            if (attackerForm == Forms.WereWolf)
+            {
+           // PlaySound
+            }
 
             // Debug
             if (attackerPlayer != null)

@@ -6,8 +6,8 @@
     "authors": [
         "Kortah"
     ],
-    "description": "A simple WereWolf Mod, I made. Officialy My first published Mod -- Like Ever... May Break in Multiplayer",
-    "version": "1.0.3",
+    "description": "A simple WereWolf Mod, I made. May Break in Multiplayer",
+    "version": "1.0.4",
     "dependencies": {
         "game": "1.21.0"
     }
