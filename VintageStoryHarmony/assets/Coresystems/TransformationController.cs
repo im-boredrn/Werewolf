@@ -55,7 +55,15 @@ namespace WereWolf.assets.Coresystems
           //  entity.World.Logger.Warning($"[DATA] Cooldown check. Ready? {IsCooldownReady(entity)}");
             if (reason == TransformationReason.ManualToggle && targetForm == Forms.WereWolf && !IsCooldownReady(entity))
             {
-             //   entity.World.Logger.Warning("[DATA] Returning because cooldown not ready");
+                //   entity.World.Logger.Warning("[DATA] Returning because cooldown not ready");
+
+                long lastTick = entity.WatchedAttributes.GetLong("lastTransformTick", 0);
+                long elapsed = entity.World.ElapsedMilliseconds - lastTick;
+                long remainingMS = Math.Max(0, WereWolfModSettings.TransformCooldownMS - elapsed);
+                int minutes = (int)(remainingMS / 60000);
+                int seconds = (int)((remainingMS % 60000) / 1000);
+
+                player.SendIngameError($"You cannot transform yet! Cooldown remaining: {minutes}m {seconds}s.");
                 return;
             }
             // 3️ If already in form, don't reapply

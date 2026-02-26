@@ -25,7 +25,7 @@ namespace WereWolf.assets.Werewolf.Configuration
         public static float HealingEffectivness => WereWolfModSystem.Config?.WereWolfHealingEffectivness ?? 2.0f;
         public static float NightRegen => WereWolfModSystem.Config?.WereWolfNightRegen ?? 0.25f;
         public static float DayRegen => WereWolfModSystem.Config?.WereWolfDayRegen ?? 0.05f;
-        public static long TransformCooldownMS => WereWolfModSystem.Config?.WereWolfTransformCoolDown ?? 5;
+        public static long TransformCooldownMS => (WereWolfModSystem.Config?.WereWolfTransformCoolDown ?? 5) * 60 * 1000L; // 5 minutes default
 
 
         //Misc

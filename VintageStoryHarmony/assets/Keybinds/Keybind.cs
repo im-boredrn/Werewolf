@@ -30,7 +30,7 @@ namespace WereWolf.assets.Keybinds
 
 
             var currentForm = PlayerData.GetForm(entity);
-            var targetForm = currentForm == PlayerData.Forms.WereWolf
+            var targetForm = currentForm == PlayerData.Forms.WereWolf // TODO Make scalabale for multiple Forms
                              ? PlayerData.Forms.VulpisHuman
                              : PlayerData.Forms.WereWolf;
 
