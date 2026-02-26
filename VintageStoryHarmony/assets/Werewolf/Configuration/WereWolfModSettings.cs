@@ -23,7 +23,7 @@ namespace WereWolf.assets.Werewolf.Configuration
         //Health
         public static float MaxHealth => WereWolfModSystem.Config?.WereWolfMaxHealth ?? 2.0f;
         public static float HealingEffectivness => WereWolfModSystem.Config?.WereWolfHealingEffectivness ?? 2.0f;
-        public static float NightRegen => WereWolfModSystem.Config?.WereWolfNightRegen ?? 0.025f;
+        public static float NightRegen => WereWolfModSystem.Config?.WereWolfNightRegen ?? 0.25f;
         public static float DayRegen => WereWolfModSystem.Config?.WereWolfDayRegen ?? 0.05f;
         public static long TransformCooldownMS => WereWolfModSystem.Config?.WereWolfTransformCoolDown ?? 5;
 
@@ -39,7 +39,7 @@ namespace WereWolf.assets.Werewolf.Configuration
         public static float AnimalLootDropRate => WereWolfModSystem.Config?.WereWolfAnimalLootDropRate ?? 2.0f;
         public static float AnimalHarvestingTime => WereWolfModSystem.Config?.WereWolfAnimalHarvestingTime ?? 2.0f;
         public static float BowDrawingStrength => WereWolfModSystem.Config?.WereWolfBowDrawingStrength ?? 2.0f  ;
-        public static float EnabledMinBrightness => WereWolfModSystem.Config?.WereWolfRangedAcc ?? 0.8f;
+        public static float EnabledMinBrightness => WereWolfModSystem.Config?.WereWolfEnabledMinBrightness ?? 0.8f;
 
 
     }

@@ -14,6 +14,7 @@ using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
 using WereWolf.assets.Coresystems;
 using WereWolf.assets.Coresystems.Infections;
+using WereWolf.assets.Coresystems.StatRelated;
 using WereWolf.assets.Keybinds;
 using WereWolf.assets.Werewolf.Configuration;
 using static WereWolf.assets.Coresystems.PlayerData;
@@ -160,14 +161,18 @@ namespace VintageStoryHarmony
 
             api.Event.PlayerJoin += (IServerPlayer player) =>
             {
-                // Only attach if not already attached
-                if (!player.Entity.HasBehavior<EntityBehaviorInfection>())
+                sapi.Event.EnqueueMainThreadTask(() =>
                 {
-                    player.Entity.AddBehavior(new EntityBehaviorInfection(player.Entity));
-                    (api as ICoreServerAPI)?.Logger.Notification($"Infection behavior attached to {player.PlayerName}");
-                }
-
+                    if (!player.Entity.HasBehavior<EntityBehaviorInfection>())
+                    {
+                        player.Entity.AddBehavior(new EntityBehaviorInfection(player.Entity));
+                        sapi.Logger.Notification($"Infection behavior attached to {player.PlayerName}");
+                        var form = PlayerData.GetForm(player.Entity);
+                        StatsManager.ApplyStats(player.Entity, form);
+                    }
+                }, "AttachInfectionBehavior, InitialStatsApply");
             };
+        
         }
 
 
@@ -175,7 +180,6 @@ namespace VintageStoryHarmony
 
         {
             Mod.Logger.Notification("Client:WEREWOLF MOD LOADED !");
-
             Capi = api;
 
 
@@ -229,10 +233,13 @@ namespace VintageStoryHarmony
 
         private void OnServerTick(float dt)
         {
+
             foreach (IServerPlayer player in sapi?.World.AllOnlinePlayers ?? Array.Empty<IServerPlayer>())
             {
                 var entity = player?.Entity as EntityPlayer;
                 if (entity == null || entity.World == null) continue; // skip if null
+
+                entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
 
                 bool night = WolfTime.isNight(entity);
                 bool day = !night;
@@ -243,19 +250,9 @@ namespace VintageStoryHarmony
 
                 entity.World.Logger.Warning($"SERVER sees form: {PlayerData.GetForm(entity)}");
              
-
-                TransformationController.ProcessTransformation(player);
-
-
-
-                // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"After transform, PlayerData.Form = {PlayerData.GetForm(entity)}");
-                // LOG SPAMMERS JUST FOR TESTING   sapi?.Logger.Warning($"ManualActive: {WereWolfModSystem.Instance?.ManualFormActive} | ManualForm: {WereWolfModSystem.Instance?.ManualForm}");
-
-
-
-
-
-
+                TransformationController.ProcessTransformation(player, dt);
+                if (PlayerData.GetForm(entity) != Forms.UnchangedHuman)
+                Regen.ApplyRegen(entity);
 
             }
 
@@ -264,9 +261,14 @@ namespace VintageStoryHarmony
         }
         private void OnClientTick(float dt)
         {
+
+
             var mod = WereWolfModSystem.Instance;
             var entity = mod?.Capi?.World.Player?.Entity as EntityPlayer;
             if (entity == null) return;
+
+            entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
+            entity.World.Logger.Warning($"CLIENT tick, checking for entity {entity.GetName()}");
 
             var form = PlayerData.GetForm(entity);
 
@@ -298,17 +300,6 @@ namespace VintageStoryHarmony
 
             clientChannel?.SendPacket(packet); 
         }
-    
-
-        
-        
-        
-
-
-
-
-
-        
 
         private void ValidateConfig()
         {
@@ -361,8 +352,7 @@ namespace VintageStoryHarmony
                    false,
                    16f,
                    pitch
-                   );
-
-        }
+            ); 
+      }
     }
 }

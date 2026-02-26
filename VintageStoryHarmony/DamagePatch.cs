@@ -26,11 +26,11 @@ namespace VintageStoryHarmony
             Entity attackerEntity = damageSource.SourceEntity;
 
             // --- Determine if target is a player ---
-            EntityPlayer targetPlayer = targetEntity as EntityPlayer;
+            EntityPlayer? targetPlayer = targetEntity as EntityPlayer;
             Forms targetForm = targetPlayer != null ? PlayerData.GetForm(targetPlayer) : Forms.UnchangedHuman;
 
             // --- Determine if attacker is a player ---
-            EntityPlayer attackerPlayer = attackerEntity as EntityPlayer;
+            EntityPlayer? attackerPlayer = attackerEntity as EntityPlayer;
             Forms attackerForm = attackerPlayer != null ? PlayerData.GetForm(attackerPlayer) : Forms.UnchangedHuman;
 
             // --- Determine if attacker is an NPC ---

@@ -1,7 +1,15 @@
 <Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
-  <Project Path="CakeBuild/CakeBuild.csproj" />
-  <Project Path="VintageStoryHarmony/WereWolf.csproj" />
+  <Project Path="CakeBuild/CakeBuild.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="VintageStoryHarmony/WereWolf.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
 </Solution>

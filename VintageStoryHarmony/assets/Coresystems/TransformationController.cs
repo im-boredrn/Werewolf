@@ -4,12 +4,15 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Vintagestory;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using Vintagestory.GameContent;
 using VintageStoryHarmony;
 using WereWolf.assets.Coresystems.Infections;
+using WereWolf.assets.Coresystems.StatRelated;
 using WereWolf.assets.Werewolf.Configuration;
 using static WereWolf.assets.Coresystems.PlayerData;
 
@@ -22,77 +25,112 @@ namespace WereWolf.assets.Coresystems
         {
             var entity = player.Entity;
             var infection = entity.GetBehavior<EntityBehaviorInfection>();
+            var healthBehavior = entity.GetBehavior<EntityBehaviorHealth>();
             var tree = entity.WatchedAttributes;
-            entity.World.Logger.Warning($"TrySetForm called | Player: {player.PlayerName} | TargetForm: {targetForm} | Reason: {reason}");
+            var currentForm = PlayerData.GetForm(entity);
+
+            entity.World.Logger.Warning("[FLOW] TrySetForm reached.");
+
+            entity.World.Logger.Warning($"[DATA] TrySetForm called | Player: {player.PlayerName} | TargetForm: {targetForm} | Reason: {reason}");
+
 
             // 1️ Infection requirement
-            if (infection == null || (infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected && reason == TransformationReason.ManualToggle))
+            if (reason == TransformationReason.ManualToggle)
             {
-                player.SendMessage(GlobalConstants.GeneralChatGroup, "You are not infected.", EnumChatType.Notification);
-                return;
+                entity.World.Logger.Warning($"[DATA] Infection behavior null? {infection == null}");
+                entity.World.Logger.Warning($"[DATA] Current infection state: {infection?.CurrentInfection()}");
+
+                if (infection == null || infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected)
+                {
+
+                    player.SendMessage(GlobalConstants.GeneralChatGroup, "You are not infected.", EnumChatType.Notification);
+                    entity.World.Logger.Warning("[DATA] Returning because infection invalid");
+                    return;
+                }
             }
 
             // 2️ Cooldown check (if manual)
 
-            var currentForm = PlayerData.GetForm(entity);
-            entity.World.Logger.Warning($"Current form: {currentForm}");
-            if (reason == TransformationReason.ManualToggle && !IsCooldownReady(entity)) return;          
-            
-            
-
+            entity.World.Logger.Warning($"[DATA] Current form: {currentForm}");
+            entity.World.Logger.Warning($"[DATA] Cooldown check. Ready? {IsCooldownReady(entity)}");
+            if (reason == TransformationReason.ManualToggle && targetForm == Forms.WereWolf && !IsCooldownReady(entity))
+            {
+                entity.World.Logger.Warning("[DATA] Returning because cooldown not ready");
+                return;
+            }
             // 3️ If already in form, don't reapply
-            if (GetForm(entity) == targetForm) return;
+            if (GetForm(entity) == targetForm)
+            {
+                entity.World.Logger.Warning("[DATA] Returning because already in form");
+                return;
+            }           
+            entity.World.Logger.Warning($"[DATA] Current infection state: {infection?.CurrentInfection()}");
 
             // 4️ Apply transformation
+            entity.World.Logger.Warning($"[DATA] About to call SetForm with {targetForm}");
             SetForm(entity, targetForm);
             if(debugMode)
             {
-                entity.World.Logger.Warning($"Form set to {targetForm}");
+                entity.World.Logger.Warning($"[DATA] Form set to {targetForm}");
 
             }
+            entity.World.Logger.Warning($"[DATA] Stats applied for {targetForm} | MaxHealth: {healthBehavior?.MaxHealth}");
             SetCooldown(entity);
+            entity.World.Logger.Warning("[FLOW] About to call ApplyStats");
+            StatsManager.ApplyStats(entity, targetForm);
+
+            entity.MarkTagsDirty();
 
             // 5 Store state
             tree.SetString("manualForm", targetForm.ToString());
             tree.SetBool("manualFormActive", reason == TransformationReason.ManualToggle);
 
             entity.MarkTagsDirty();
-            entity.World.Logger.Warning($"TrySetForm applied: {targetForm} | ManualActive: {reason == TransformationReason.ManualToggle}");
+            entity.World.Logger.Warning($"[DATA] TrySetForm applied: {targetForm} | ManualActive: {reason == TransformationReason.ManualToggle}");
         }
 
-        public static void ProcessTransformation(IServerPlayer player)
+        public static void ProcessTransformation(IServerPlayer player, float dt)
         {
+            player.Entity.World.Logger.Warning("[FLOW] ProcessTransformation CALLED"); 
             var entity = player.Entity;
-            if (entity == null) return;
+            player.Entity.World.Logger.Warning($"[DATA] ProcessTransformation start | Form: {PlayerData.GetForm(entity)}");
+
+            if (entity == null)
+            {
+                entity?.World.Logger.Warning("[DATA] entity null returning...");
+                return;
+            }
 
             bool manualActive = entity.WatchedAttributes.GetBool("manualFormActive", false);
-            if (manualActive) return;
+            if (manualActive) 
+            {
+                entity.World.Logger.Warning("[DATA] Manual Active  returning...");
+                return;
+            }
 
             var infection = entity.GetBehavior<EntityBehaviorInfection>();
             if (infection == null || infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected)
+            {
+                entity.World.Logger.Warning($"[DATA] Infection: {infection?.CurrentInfection() ?? EntityBehaviorInfection.Infectionstatus.None} — returning...");
                 return;
+            }
 
             bool isNight = WolfTime.isNight(entity);
             Forms decidedForm = isNight ? Forms.WereWolf : Forms.VulpisHuman;
 
             Forms currentForm = PlayerData.GetForm(entity);
 
-            // 1️ Handle transformation if needed
+            // Handle transformation if needed
             if (currentForm != decidedForm)
             {
                 TrySetForm(player, decidedForm, TransformationReason.Auto);
-                Stats.ApplyStats(entity, decidedForm);
+              
                 currentForm = decidedForm; // update local value
             }
 
-            // 2️ ALWAYS apply regen every tick
 
-            float regen = Stats.GetRegenAmount(entity, currentForm);
-            float deltaSeconds = entity.World.ElapsedMilliseconds; // or equivalent server delta
-            regen *= deltaSeconds;
-            Stats.ApplyRegen(entity, regen);
         }
-             public static bool IsCooldownReady(EntityPlayer player)
+        public static bool IsCooldownReady(EntityPlayer player)
         {
             long lastTransformTick = player.WatchedAttributes.GetLong("lastTransformTick", 0);
             long currentTick = player.World.ElapsedMilliseconds;

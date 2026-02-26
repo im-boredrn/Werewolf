@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,8 +17,9 @@ namespace WereWolf.assets.Coresystems.Infections
     internal class EntityBehaviorInfection : EntityBehavior
     {
         private bool DebugMode = false; // For Debug Mode 
+        private bool inited = false;
         private EntityPlayer Player => (EntityPlayer)entity; // assignment operator is saying assign the value on the left to the value on the right.
-        private ServerPlayer ServerPlayer => (ServerPlayer)ServerPlayer;
+
         public EntityBehaviorInfection(Entity entity) : base(entity) // no need to pass Entityplayer entity anymore since we are attaching it to them.
         {
             if (entity.HasBehavior<EntityBehaviorInfection>()) return;
@@ -48,13 +50,30 @@ namespace WereWolf.assets.Coresystems.Infections
         }
         public override void OnGameTick(float deltaTime) // Processing Logic
         {
-            if (entity.World.Side != EnumAppSide.Server) return; // guard server side
+            if (entity.World.Side != EnumAppSide.Server)
+            {
+                Player.World.Logger.Warning($"[DATA] Returning ticking through: {Player.World.Side}");
+                return; // guard server side
+
+                
+                }
+            if (!inited)
+            {
+                // wait one tick to ensure client is ready
+                inited = true;
+                return;
+
+            }
 
             ICoreServerAPI? sapi = entity.World.Api as ICoreServerAPI;
 
-            InfectionNight(); // Waits till next night to force change
+            var serverPlayer = Player as IServerPlayer;
+            if (serverPlayer == null) return;
 
-            ProcessInfection();
+            InfectionNight(serverPlayer);      
+            ProcessInfection(serverPlayer);
+
+
             if (DebugMode)
                 sapi?.Logger.Warning("Transform triggered");
 
@@ -111,11 +130,11 @@ namespace WereWolf.assets.Coresystems.Infections
         }
 
         // --- Apply infection from an attacker ---
-        public  void ApplyInfection(Entity attacker, int amount = 10) // Mutation
+        public void ApplyInfection(Entity attacker, int amount = 10) // Mutation
         {
             ICoreServerAPI? sapi = entity.World.Api as ICoreServerAPI; // Message
 
-            if ( attacker == null) return;
+            if (attacker == null) return;
 
             string attackerCode = attacker.Code?.Path ?? "unknown";
 
@@ -134,30 +153,42 @@ namespace WereWolf.assets.Coresystems.Infections
                 sapi?.Logger.Warning($"Attacker path: {attacker.Code?.Path}");
                 sapi?.Logger.Warning($"Attacker code: {attacker.Code?.Path}, Infection level: {GetInfectionLevel()}");
             }
-             
+
             // if (attackerCode == "Bear") You See How I can scale this later
 
             // Update infection status if threshold reached
             if (previousLevel < InfectionThreshold && currentLevel >= InfectionThreshold)
             {
+                if (entity.World.Side != EnumAppSide.Server)
+                {
+                    Player.World.Logger.Warning($"[DATA] Returning tried to sendMessage through {Player.World.Side}");
+                    return;
+                }
                 SetInfectionStatus(Infectionstatus.Infected);
+                
+                if (Player.World.Side == EnumAppSide.Server && Player?.Player != null)
+                {
+                    Player.World.Api.Event.EnqueueMainThreadTask(() =>
+                    {
+                        // Waits one tick to ensure client UI is ready
+                        sapi?.SendMessage(
+                            Player.Player,
+                            GlobalConstants.GeneralChatGroup,
+                            "You feel sick...",
+                            EnumChatType.Notification
+                        );  // <-- unique code for this task
+                    }, "infectionMessage"); // <-- unique code for this task);
 
-                sapi?.SendMessage(
-                    Player.Player,
-                    GlobalConstants.GeneralChatGroup,
-                    "You feel sick...",
-                    EnumChatType.Notification
+                }
+                if (DebugMode)
+                {
+                    sapi?.Logger.Warning($"Attacker: {attackerCode}, Level: {currentLevel}");
 
-                );
+                    sapi?.Logger.Warning(
+        $"Hit by: {attacker?.Code?.Path ?? "null"}, PrevLvl: {previousLevel}, NewLvl: {currentLevel}, Threshold: {InfectionThreshold}, Status: {CurrentInfection()}");
+                }
+
             }
-            if (DebugMode)
-            {
-                sapi?.Logger.Warning($"Attacker: {attackerCode}, Level: {currentLevel}");
-
-                sapi?.Logger.Warning(
-    $"Hit by: {attacker?.Code?.Path ?? "null"}, PrevLvl: {previousLevel}, NewLvl: {currentLevel}, Threshold: {InfectionThreshold}, Status: {CurrentInfection()}");
-            }
-
         }
 
         // --- Get infection status, optionally apply attacker effect ---
@@ -167,23 +198,21 @@ namespace WereWolf.assets.Coresystems.Infections
         }
 
         // --- Process infection effects, like transforming forms ---
-        public  void ProcessInfection() 
+        public  void ProcessInfection(IServerPlayer player) 
         {
             ICoreServerAPI? sapi = entity.World.Api as ICoreServerAPI; // Message
-
             var form = PlayerData.GetForm(Player);
 
             if (GetInfection() == Infectionstatus.Infected && form == Forms.UnchangedHuman)
             {
-                TransformationController.TrySetForm(ServerPlayer, Forms.VulpisHuman, TransformationReason.InfectionCycle); 
+                TransformationController.TrySetForm(player, Forms.VulpisHuman, TransformationReason.InfectionCycle); 
             }
             if (DebugMode)
                 sapi?.Logger.Warning($"Processing infection. Status: {GetInfection()}");
         }
 
-        public void InfectionNight()
+        public void InfectionNight(IServerPlayer player)
         {
-            ICoreServerAPI? sapi = entity.World.Api as ICoreServerAPI; // Message
 
             bool lastNight = GetLastNight();
           bool currentNight = WolfTime.isNight(Player);
@@ -193,14 +222,14 @@ namespace WereWolf.assets.Coresystems.Infections
             //   First tick of night > transform infected human to wolf
             if (GetInfection() == Infectionstatus.Infected && GetForm(Player) == Forms.VulpisHuman)
                 {
-                    TransformationController.TrySetForm(ServerPlayer, Forms.WereWolf, TransformationReason.InfectionCycle);
+                    TransformationController.TrySetForm(player, Forms.WereWolf, TransformationReason.InfectionCycle);
                 }
             }
             // ALWAYS update tracker
             Player.WatchedAttributes.SetBool(WasNightKey, currentNight);
             Player.WatchedAttributes.MarkPathDirty(WasNightKey);
             if (DebugMode)
-                sapi?.Logger.Warning($"Night check. Was: {lastNight}, Now: {currentNight}");
+                Player.World.Logger.Warning($"Night check. Was: {lastNight}, Now: {currentNight}");
         }
         public override string PropertyName()
         {
