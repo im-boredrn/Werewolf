@@ -29,60 +29,64 @@ namespace WereWolf.assets.Coresystems
             var tree = entity.WatchedAttributes;
             var currentForm = PlayerData.GetForm(entity);
 
-            entity.World.Logger.Warning("[FLOW] TrySetForm reached.");
+          //  entity.World.Logger.Warning("[FLOW] TrySetForm reached.");
 
-            entity.World.Logger.Warning($"[DATA] TrySetForm called | Player: {player.PlayerName} | TargetForm: {targetForm} | Reason: {reason}");
+            //entity.World.Logger.Warning($"[DATA] TrySetForm called | Player: {player.PlayerName} | TargetForm: {targetForm} | Reason: {reason}");
 
 
             // 1️ Infection requirement
             if (reason == TransformationReason.ManualToggle)
             {
-                entity.World.Logger.Warning($"[DATA] Infection behavior null? {infection == null}");
-                entity.World.Logger.Warning($"[DATA] Current infection state: {infection?.CurrentInfection()}");
+              //  entity.World.Logger.Warning($"[DATA] Infection behavior null? {infection == null}");
+             //   entity.World.Logger.Warning($"[DATA] Current infection state: {infection?.CurrentInfection()}");
 
                 if (infection == null || infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected)
                 {
 
                     player.SendMessage(GlobalConstants.GeneralChatGroup, "You are not infected.", EnumChatType.Notification);
-                    entity.World.Logger.Warning("[DATA] Returning because infection invalid");
+                 //   entity.World.Logger.Warning("[DATA] Returning because infection invalid");
                     return;
                 }
             }
 
             // 2️ Cooldown check (if manual)
 
-            entity.World.Logger.Warning($"[DATA] Current form: {currentForm}");
-            entity.World.Logger.Warning($"[DATA] Cooldown check. Ready? {IsCooldownReady(entity)}");
+          //  entity.World.Logger.Warning($"[DATA] Current form: {currentForm}");
+          //  entity.World.Logger.Warning($"[DATA] Cooldown check. Ready? {IsCooldownReady(entity)}");
             if (reason == TransformationReason.ManualToggle && targetForm == Forms.WereWolf && !IsCooldownReady(entity))
             {
-                entity.World.Logger.Warning("[DATA] Returning because cooldown not ready");
+             //   entity.World.Logger.Warning("[DATA] Returning because cooldown not ready");
                 return;
             }
             // 3️ If already in form, don't reapply
             if (GetForm(entity) == targetForm)
             {
-                entity.World.Logger.Warning("[DATA] Returning because already in form");
+          //      entity.World.Logger.Warning("[DATA] Returning because already in form");
                 return;
             }           
-            entity.World.Logger.Warning($"[DATA] Current infection state: {infection?.CurrentInfection()}");
+        //    entity.World.Logger.Warning($"[DATA] Current infection state: {infection?.CurrentInfection()}");
 
             // 4️ Apply transformation
-            entity.World.Logger.Warning($"[DATA] About to call SetForm with {targetForm}");
+           // entity.World.Logger.Warning($"[DATA] About to call SetForm with {targetForm}");
             SetForm(entity, targetForm);
             if(debugMode)
             {
-                entity.World.Logger.Warning($"[DATA] Form set to {targetForm}");
+          //      entity.World.Logger.Warning($"[DATA] Form set to {targetForm}");
 
             }
-            entity.World.Logger.Warning($"[DATA] Stats applied for {targetForm} | MaxHealth: {healthBehavior?.MaxHealth}");
-            SetCooldown(entity);
-            entity.World.Logger.Warning("[FLOW] About to call ApplyStats");
+
+          //  entity.World.Logger.Warning("[FLOW] About to call ApplyStats");
             StatsManager.ApplyStats(entity, targetForm);
+           // entity.World.Logger.Warning($"[DATA] Stats applied for {targetForm} | MaxHealth: {healthBehavior?.MaxHealth}");
+            if (targetForm == Forms.WereWolf && reason == TransformationReason.ManualToggle)
+            {
+                SetCooldown(entity);
+            }
 
             entity.MarkTagsDirty();
 
             // 5 Store state
-            tree.SetString("manualForm", targetForm.ToString());
+         //   tree.SetString("manualForm", targetForm.ToString());
             tree.SetBool("manualFormActive", reason == TransformationReason.ManualToggle);
 
             entity.MarkTagsDirty();
@@ -104,8 +108,16 @@ namespace WereWolf.assets.Coresystems
             bool manualActive = entity.WatchedAttributes.GetBool("manualFormActive", false);
             if (manualActive) 
             {
-                entity.World.Logger.Warning("[DATA] Manual Active  returning...");
+                if (!IsCooldownReady(entity))
+                    entity.World.Logger.Warning("[DATA] Manual Active — cooldown not ready, skipping auto...");
                 return;
+            }
+            else
+            {
+                // Cooldown expired > reset manual lock
+                entity.WatchedAttributes.SetBool("manualFormActive", false);
+                entity.MarkTagsDirty();
+                entity.World.Logger.Warning("[DATA] Manual lock expired, resuming auto logic.");
             }
 
             var infection = entity.GetBehavior<EntityBehaviorInfection>();

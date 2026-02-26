@@ -239,7 +239,7 @@ namespace VintageStoryHarmony
                 var entity = player?.Entity as EntityPlayer;
                 if (entity == null || entity.World == null) continue; // skip if null
 
-                entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
+              //  entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
 
                 bool night = WolfTime.isNight(entity);
                 bool day = !night;
@@ -267,8 +267,8 @@ namespace VintageStoryHarmony
             var entity = mod?.Capi?.World.Player?.Entity as EntityPlayer;
             if (entity == null) return;
 
-            entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
-            entity.World.Logger.Warning($"CLIENT tick, checking for entity {entity.GetName()}");
+          //  entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
+          //  entity.World.Logger.Warning($"CLIENT tick, checking for entity {entity.GetName()}");
 
             var form = PlayerData.GetForm(entity);
 
@@ -296,7 +296,7 @@ namespace VintageStoryHarmony
         void SendToggleFormPacket(PlayerData.Forms targetForm)
         {
             var packet = new ToggleFormPacket { TargetForm = targetForm };
-            Capi?.Logger.Warning($"Sending toggle form packet. TargetForm = {targetForm}");
+       //     Capi?.Logger.Warning($"Sending toggle form packet. TargetForm = {targetForm}");
 
             clientChannel?.SendPacket(packet); 
         }
