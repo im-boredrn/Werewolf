@@ -252,7 +252,9 @@ namespace VintageStoryHarmony
              
                 TransformationController.ProcessTransformation(player, dt);
                 if (PlayerData.GetForm(entity) != Forms.UnchangedHuman)
-                Regen.ApplyRegen(entity);
+                {
+                    Regen.ApplyRegen(entity);
+                }
 
             }
 

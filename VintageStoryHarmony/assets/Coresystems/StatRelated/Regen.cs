@@ -34,7 +34,7 @@ namespace WereWolf.assets.Coresystems.StatRelated
             bool night = WolfTime.isNight(player);
 
             // Only apply regen if WereWolf, Will Be reworkd for scalability
-            if (form != PlayerData.Forms.WereWolf) return;
+            if (form == PlayerData.Forms.UnchangedHuman) return;
 
             float regenAmount = night ? WereWolfModSettings.NightRegen : WereWolfModSettings.DayRegen;
             float oldHealth = healthBehavior.Health;
