@@ -14,6 +14,6 @@ WereWolf Walk Cycle
 
 
 
-
-
-Auto-commenting lines in VS Code: Use multi-cursor find (Alt+Enter) to select all occurrences of a word/phrase, then Ctrl+/ (Windows) or Cmd+/ (Mac) to comment/uncomment them all at once. Perfect for temporarily silencing logs. // Ignore this it was just driving me insane to edit so many  logs
+AutoCommenting
+-----------------------------
+Auto-commenting lines in VS : Use multi-cursor find (Alt+Enter) to select all occurrences of a word/phrase, then Ctrl+/ (Windows) or Cmd+/ (Mac) to comment/uncomment them all at once. Perfect for temporarily silencing logs. // Ignore this it was just driving me insane to edit so many  logs
