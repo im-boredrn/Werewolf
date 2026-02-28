@@ -7,6 +7,11 @@ WereWolf Model v0.3
 <img width="1920" height="1032" alt="Screenshot 2026-02-27 211927" src="https://github.com/user-attachments/assets/37155cb0-c2c8-4ee7-88fb-f4cbe136e8ac" />
 
 
+WereWolf Model v0.7
+-----------------------------
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/a517d19f-c440-48da-8d71-4de7811166a6" />
+
+
 WereWolf Walk Cycle
 -----------------------------
 
