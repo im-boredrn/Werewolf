@@ -16,6 +16,7 @@ using WereWolf.assets.Coresystems;
 using WereWolf.assets.Coresystems.Infections;
 using WereWolf.assets.Coresystems.StatRelated;
 using WereWolf.assets.Keybinds;
+using WereWolf.assets.Werewolf;
 using WereWolf.assets.Werewolf.Configuration;
 using static WereWolf.assets.Coresystems.PlayerData;
 
@@ -106,8 +107,12 @@ namespace VintageStoryHarmony
                     WereWolfBowDrawingStrength = 2f,
                     WereWolfDayRegen = 0.05f,
                     WereWolfNightRegen = 0.025f,
-                    WereWolfTransformCoolDown = 5,
-                    WereWolfEnabledMinBrightness = 0.8f
+                    WereWolfTransformCoolDown = 5, // make 0.0 instead of plain 0 to account for seconds and 0.00 to remove cooldown
+                    WereWolfEnabledMinBrightness = 0.8f,
+                    WereWolfTransformSound = true,
+                    WereWolfAttackSound = true,
+                    WereWolfModelSwitcher = true
+
                 };
 
                 api.Logger.Notification("Config loaded and validated. Any invalid values were reset to safe defaults.");
@@ -142,7 +147,7 @@ namespace VintageStoryHarmony
 
         public override void StartServerSide(ICoreServerAPI api) // SERVER SIDE
         {
-            Mod.Logger.Notification("Server:WEREWOLF MOD LOADED !");
+        //    Mod.Logger.Notification("Server:WEREWOLF MOD LOADED !");
 
             sapi = api;
             // Tick Listener
@@ -155,7 +160,7 @@ namespace VintageStoryHarmony
        {
 
            TransformationController.TrySetForm(player, packet.TargetForm, TransformationReason.ManualToggle);
-           sapi.Logger.Warning($"Server received toggle packet. TargetForm = {packet.TargetForm}");
+           //api.logger.Warning($"Server received toggle packet. TargetForm = {packet.TargetForm}");
 
        });
 
@@ -179,11 +184,11 @@ namespace VintageStoryHarmony
         public override void StartClientSide(ICoreClientAPI api) // CLIENT SIDE
 
         {
-            Mod.Logger.Notification("Client:WEREWOLF MOD LOADED !");
+          //  Mod.Logger.Notification("Client:WEREWOLF MOD LOADED !");
             Capi = api;
 
 
-            api.Logger.Warning($"KEYBIND ran on: {api.Side}");
+            //api.logger.Warning($"KEYBIND ran on: {api.Side}");
 
 
             clienttickListenerId = api.Event.RegisterGameTickListener(OnClientTick, 1000);   // client tick listener
@@ -192,29 +197,29 @@ namespace VintageStoryHarmony
 
             api.Input.SetHotKeyHandler("toggleform", (G) =>
             {
-                api.Logger.Warning("Keybind pressed!");
+              // //api.logger.Warning("Keybind pressed!");
 
                 var entity = api.World.Player?.Entity;
                 if (entity == null)
                 {
-                    api.Logger.Warning("Keybind pressed but entity is null!");
+                    //api.logger.Warning("Keybind pressed but entity is null!");
                     return false;
                 }
 
-                api.Logger.Warning("Keybind pressed! Player entity detected.");
+              //  //api.logger.Warning("Keybind pressed! Player entity detected.");
                 // Determine target form: toggle between WereWolf and VulpisHuman
                 var currentForm = PlayerData.GetForm(entity);
                 var targetForm = currentForm == PlayerData.Forms.WereWolf
                                  ? PlayerData.Forms.VulpisHuman
                                  : PlayerData.Forms.WereWolf;
 
-                api.Logger.Warning($"Determined target form: {targetForm}");
+               // //api.logger.Warning($"Determined target form: {targetForm}");
 
 
                 // Send packet to server requesting transformation
                 SendToggleFormPacket(targetForm);
 
-                api.Logger.Warning($"Sending toggle form packet. TargetForm = {targetForm}");
+          //      //api.logger.Warning($"Sending toggle form packet. TargetForm = {targetForm}");
 
                 return true; // key handled / consumed
 
@@ -248,13 +253,14 @@ namespace VintageStoryHarmony
                 // Safe logging
                 // LOG SPAMMERS JUST FOR TESTING  sapi?.Logger.Warning($"Hour: {entity.World.Calendar?.HourOfDay ?? -1} | Night: {night}");
 
-                entity.World.Logger.Warning($"SERVER sees form: {PlayerData.GetForm(entity)}");
+          //      entity.World.Logger.Warning($"SERVER sees form: {PlayerData.GetForm(entity)}");
              
                 TransformationController.ProcessTransformation(player, dt);
                 if (PlayerData.GetForm(entity) != Forms.UnchangedHuman)
                 {
                     Regen.ApplyRegen(entity);
                 }
+
 
             }
 
@@ -268,9 +274,10 @@ namespace VintageStoryHarmony
             var mod = WereWolfModSystem.Instance;
             var entity = mod?.Capi?.World.Player?.Entity as EntityPlayer;
             if (entity == null) return;
+            ModelSwitcher.ModelSwitch(entity);
 
-          //  entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
-          //  entity.World.Logger.Warning($"CLIENT tick, checking for entity {entity.GetName()}");
+            //  entity.World.Logger.Warning($"Player {entity.GetName()} spawned, entity code: {entity.Code?.Path}, pos: {entity.Pos}");
+            //  entity.World.Logger.Warning($"CLIENT tick, checking for entity {entity.GetName()}");
 
             var form = PlayerData.GetForm(entity);
 
@@ -283,7 +290,7 @@ namespace VintageStoryHarmony
 
             if (form != lastForm)
             {
-                if (form == Forms.WereWolf)
+                if (form == Forms.WereWolf && WereWolfModSettings.TransformSound == true)
                     PlayPlayerSound("sounds/werewolf/werewolf-transformation1", entity, 0.8f, 1f);
                 else
                     PlayPlayerSound("sounds/human/human-transform1", entity, 1f, 1.1f);
@@ -291,7 +298,7 @@ namespace VintageStoryHarmony
                 lastForm = form;
             }
 
-            Capi?.Logger.Warning($"CLIENT sees form: {form}");
+          //  Capi?.Logger.Warning($"CLIENT sees form: {form}");
 
 
         }

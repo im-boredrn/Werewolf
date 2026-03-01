@@ -24,8 +24,8 @@ namespace WereWolf.assets.Coresystems.StatRelated
       
         public static void ApplyStats(EntityPlayer player, PlayerData.Forms form)
         {
-            player.World.Logger.Warning($"[FLOW] ApplyStats CALLED. Form = {PlayerData.GetForm(player)}");
-            player.World.Logger.Warning($"[DATA] ApplyStats running on side: {player.World.Side}");
+         //   player.World.Logger.Warning($"[FLOW] ApplyStats CALLED. Form = {PlayerData.GetForm(player)}");
+         //   player.World.Logger.Warning($"[DATA] ApplyStats running on side: {player.World.Side}");
             var stats = player.Stats;
             var currentStoredForm = GetStoredForm(player);
             var healthBehavior = player.GetBehavior<EntityBehaviorHealth>();
@@ -58,7 +58,7 @@ namespace WereWolf.assets.Coresystems.StatRelated
                     stats.Set("bowDrawingStrength", StatKey, WereWolfModSettings.BowDrawingStrength, true);
                     if (healthBehavior != null)
                     {
-                        player.World.Logger.Warning($"[FLOW] Updating Health. Form = {PlayerData.GetForm(player)}");
+               //         player.World.Logger.Warning($"[FLOW] Updating Health. Form = {PlayerData.GetForm(player)}");
 
                         float newMax = healthBehavior.MaxHealth;
                         float oldPercent = oldMax > 0 ? oldHealth / oldMax : 1f;
@@ -84,7 +84,7 @@ namespace WereWolf.assets.Coresystems.StatRelated
 
                   if (healthBehavior != null)
                     {
-                        player.World.Logger.Warning($"[FLOW] Updating Health. Form = {PlayerData.GetForm(player)}");
+                 //       player.World.Logger.Warning($"[FLOW] Updating Health. Form = {PlayerData.GetForm(player)}");
 
                         float newMax = healthBehavior.MaxHealth;
                        float oldPercent = oldMax > 0 ? oldHealth / oldMax : 1f;

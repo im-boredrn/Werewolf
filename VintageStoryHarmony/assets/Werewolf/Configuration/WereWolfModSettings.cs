@@ -31,6 +31,10 @@ namespace WereWolf.assets.Werewolf.Configuration
         //Misc
         public static float RangedAcc => WereWolfModSystem.Config?.WereWolfRangedAcc ?? 0.10f;
         public static bool DisableFallDamage => WereWolfModSystem.Config?.WereWolfDisableFallDamage ?? false;
+        public static bool TransformSound => WereWolfModSystem.Config?.WereWolfTransformSound ?? true;
+        public static bool AttackSound => WereWolfModSystem.Config?.WereWolfAttackSound ?? true;
+        public static bool ModelSwitcher => WereWolfModSystem.Config?.WereWolfModelSwitcher ?? true;
+
 
         //Wolf Abilities
         public static float ForageDropRate => WereWolfModSystem.Config?.WereWolfForageDropRate ?? 2.0f ;

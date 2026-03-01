@@ -55,7 +55,7 @@ namespace WereWolf.assets.Coresystems
           //  entity.World.Logger.Warning($"[DATA] Cooldown check. Ready? {IsCooldownReady(entity)}");
             if (reason == TransformationReason.ManualToggle && targetForm == Forms.WereWolf && !IsCooldownReady(entity))
             {
-                //   entity.World.Logger.Warning("[DATA] Returning because cooldown not ready");
+                   entity.World.Logger.Warning("[DATA] Returning because cooldown not ready");
 
                 long lastTick = entity.WatchedAttributes.GetLong("lastTransformTick", 0);
                 long elapsed = entity.World.ElapsedMilliseconds - lastTick;
@@ -69,7 +69,7 @@ namespace WereWolf.assets.Coresystems
             // 3️ If already in form, don't reapply
             if (GetForm(entity) == targetForm)
             {
-          //      entity.World.Logger.Warning("[DATA] Returning because already in form");
+              entity.World.Logger.Warning("[DATA] Returning because already in form");
                 return;
             }           
         //    entity.World.Logger.Warning($"[DATA] Current infection state: {infection?.CurrentInfection()}");
@@ -94,18 +94,18 @@ namespace WereWolf.assets.Coresystems
             entity.MarkTagsDirty();
 
             // 5 Store state
-         //   tree.SetString("manualForm", targetForm.ToString());
+          tree.SetString("manualForm", targetForm.ToString());
             tree.SetBool("manualFormActive", reason == TransformationReason.ManualToggle);
 
             entity.MarkTagsDirty();
-            entity.World.Logger.Warning($"[DATA] TrySetForm applied: {targetForm} | ManualActive: {reason == TransformationReason.ManualToggle}");
+          //  entity.World.Logger.Warning($"[DATA] TrySetForm applied: {targetForm} | ManualActive: {reason == TransformationReason.ManualToggle}");
         }
 
         public static void ProcessTransformation(IServerPlayer player, float dt)
         {
-            player.Entity.World.Logger.Warning("[FLOW] ProcessTransformation CALLED"); 
+         //   player.Entity.World.Logger.Warning("[FLOW] ProcessTransformation CALLED"); 
             var entity = player.Entity;
-            player.Entity.World.Logger.Warning($"[DATA] ProcessTransformation start | Form: {PlayerData.GetForm(entity)}");
+        //    player.Entity.World.Logger.Warning($"[DATA] ProcessTransformation start | Form: {PlayerData.GetForm(entity)}");
 
             if (entity == null)
             {
@@ -117,7 +117,7 @@ namespace WereWolf.assets.Coresystems
             if (manualActive) 
             {
                 if (!IsCooldownReady(entity))
-                    entity.World.Logger.Warning("[DATA] Manual Active — cooldown not ready, skipping auto...");
+                entity.World.Logger.Warning("[DATA] Manual Active — cooldown not ready, skipping auto...");
                 return;
             }
             else
@@ -125,13 +125,13 @@ namespace WereWolf.assets.Coresystems
                 // Cooldown expired > reset manual lock
                 entity.WatchedAttributes.SetBool("manualFormActive", false);
                 entity.MarkTagsDirty();
-                entity.World.Logger.Warning("[DATA] Manual lock expired, resuming auto logic.");
+             entity.World.Logger.Warning("[DATA] Manual lock expired, resuming auto logic.");
             }
 
             var infection = entity.GetBehavior<EntityBehaviorInfection>();
             if (infection == null || infection.CurrentInfection() != EntityBehaviorInfection.Infectionstatus.Infected)
             {
-                entity.World.Logger.Warning($"[DATA] Infection: {infection?.CurrentInfection() ?? EntityBehaviorInfection.Infectionstatus.None} — returning...");
+          //      entity.World.Logger.Warning($"[DATA] Infection: {infection?.CurrentInfection() ?? EntityBehaviorInfection.Infectionstatus.None} — returning...");
                 return;
             }
 

@@ -22,7 +22,7 @@ namespace WereWolf.assets.Coresystems.StatRelated
 
         public static void ApplyRegen(EntityPlayer player) // TODO Refacor for scalibility
         {
-            player.World.Logger.Warning("ApplyRegen CALLED.");
+          //  player.World.Logger.Warning("ApplyRegen CALLED.");
 
             //  if (player == null || regenAmount <= 0f) return;
 
@@ -43,7 +43,7 @@ namespace WereWolf.assets.Coresystems.StatRelated
             healthBehavior.MarkDirty();
 
             // Logging for isolation
-            player.World.Logger.Warning($"[Regen] Tick | Form: {form} | Night: {night} | Amount: {regenAmount} | Health: {oldHealth} -> {healthBehavior.Health}");
+          //  player.World.Logger.Warning($"[Regen] Tick | Form: {form} | Night: {night} | Amount: {regenAmount} | Health: {oldHealth} -> {healthBehavior.Health}");
 
         }
     }

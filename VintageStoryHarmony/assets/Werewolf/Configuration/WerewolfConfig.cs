@@ -23,6 +23,9 @@ namespace WereWolf.assets.Werewolf.Configuration
         public float WereWolfNightRegen { get; set; } = 0.25f;
         public float WereWolfDayRegen { get; set; } = 0.05f;
         public long WereWolfTransformCoolDown { get; set; } = 5;
+        public bool WereWolfTransformSound { get; set; } = true;
+        public bool WereWolfAttackSound { get; set; } = true;
+        public bool WereWolfModelSwitcher { get; set; } = true;
 
 
 

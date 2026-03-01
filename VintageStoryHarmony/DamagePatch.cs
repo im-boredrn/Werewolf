@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using WereWolf.assets.Coresystems;
@@ -17,6 +18,7 @@ namespace VintageStoryHarmony
     [HarmonyPatch(typeof(Entity), "ReceiveDamage")]
     public class DamagePatch
     {
+        ICoreClientAPI? capi;
         static void Prefix(Entity __instance, DamageSource damageSource, ref float damage)
         {
             if (__instance == null || damageSource == null) return;
@@ -102,10 +104,21 @@ namespace VintageStoryHarmony
             // 5. Apply final damage
             damage *= multiplier;
 
-            if (attackerIsWereWolf)
+
+
+            if (attackerIsWereWolf && attackerPlayer != null)
             {
-           // PlaySound
-            }
+                if (attackerEntity?.World.Api.Side == EnumAppSide.Client && WereWolfModSettings.AttackSound == true)
+                {
+                    WereWolfModSystem.Instance?.PlayPlayerSound(
+                        "sounds/werewolf/werewolf-attack1",
+                        attackerPlayer,
+                        0.9f,
+                        1.1f
+                    );
+                }
+                }
+            
 
             // Debug
             if (attackerIsPlayer)

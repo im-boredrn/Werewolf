@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="PlayerModelLib">
+      <HintPath>D:\Downloads\PlayerModelLib.dll</HintPath>
+	<Private>false</Private>
+    </Reference>
     <Reference Include="protobuf-net">
       <HintPath>E:\Vintagestory\Lib\protobuf-net.dll</HintPath>
 	<Private>false</Private>
