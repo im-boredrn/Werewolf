@@ -12,6 +12,11 @@ WereWolf Model v0.7
 <img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/a517d19f-c440-48da-8d71-4de7811166a6" />
 
 
+WereWolf Model v1.0
+-----------------------------
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/0f67b82e-198e-47fd-b8b4-e337108911dd" />
+
+
 WereWolf Walk Cycle
 -----------------------------
 
