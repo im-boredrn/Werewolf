@@ -15,6 +15,8 @@ WereWolf Model v0.7
 WereWolf Walk Cycle
 -----------------------------
 
+https://github.com/user-attachments/assets/47e0ac32-e9f2-41f6-8ab9-e8810929b4c6
+
 
 
 
