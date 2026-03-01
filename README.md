@@ -1,0 +1,47 @@
+WereWolf Model Documentation
+-----------------------------
+
+WereWolf Model v0.3
+-----------------------------
+
+<img width="1920" height="1032" alt="Screenshot 2026-02-27 211927" src="https://github.com/user-attachments/assets/37155cb0-c2c8-4ee7-88fb-f4cbe136e8ac" />
+
+
+WereWolf Model v0.7
+-----------------------------
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/a517d19f-c440-48da-8d71-4de7811166a6" />
+
+
+WereWolf Model v1.0
+-----------------------------
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/0f67b82e-198e-47fd-b8b4-e337108911dd" />
+
+
+WereWolf Walk Cycle
+-----------------------------
+
+https://github.com/user-attachments/assets/47e0ac32-e9f2-41f6-8ab9-e8810929b4c6
+
+WereWolf Idle
+-----------------------------
+
+https://github.com/user-attachments/assets/628360cc-ca63-4770-af50-a5e7227894cd
+
+WereWolfSneak
+-----------------------------
+
+https://github.com/user-attachments/assets/bf5e8d70-d30d-42da-b887-d96a1b1002c8
+
+WereWolfSneak-Idle
+-----------------------------
+
+https://github.com/user-attachments/assets/8f995583-17b7-4a10-ae3f-3fd6c99a4aeb
+
+WereWolfSprint
+-----------------------------
+
+https://github.com/user-attachments/assets/ab6f553e-c559-4696-a328-9a2945269ccc
+
+AutoCommenting
+-----------------------------
+Auto-commenting lines in VS : Use multi-cursor find (Alt+Enter) to select all occurrences of a word/phrase, then Ctrl+/ (Windows) or Cmd+/ (Mac) to comment/uncomment them all at once. Perfect for temporarily silencing logs. // Ignore this it was just driving me insane to edit so many  logs
