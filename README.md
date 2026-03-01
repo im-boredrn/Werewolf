@@ -17,9 +17,25 @@ WereWolf Walk Cycle
 
 https://github.com/user-attachments/assets/47e0ac32-e9f2-41f6-8ab9-e8810929b4c6
 
+WereWolf Idle
+-----------------------------
 
+https://github.com/user-attachments/assets/628360cc-ca63-4770-af50-a5e7227894cd
 
+WereWolfSneak
+-----------------------------
 
+https://github.com/user-attachments/assets/bf5e8d70-d30d-42da-b887-d96a1b1002c8
+
+WereWolfSneak-Idle
+-----------------------------
+
+https://github.com/user-attachments/assets/8f995583-17b7-4a10-ae3f-3fd6c99a4aeb
+
+WereWolfSprint
+-----------------------------
+
+https://github.com/user-attachments/assets/ab6f553e-c559-4696-a328-9a2945269ccc
 
 AutoCommenting
 -----------------------------
