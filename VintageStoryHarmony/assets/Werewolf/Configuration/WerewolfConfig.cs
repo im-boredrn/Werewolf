@@ -13,7 +13,7 @@ namespace WereWolf.assets.Werewolf.Configuration
         public float WereWolfJump { get; set; } = 1.3f;
 
 
-        // Core Stats
+        // Core Stats 
         public float WerewolfDamage { get; set; } = 2.0f; // Harmony
         public float WereWolfDamageReduction  { get; set; } = 0.80f; // Harmony 
         public float WereWolfMaxHealth { get; set; } = 2.0f;
@@ -23,10 +23,15 @@ namespace WereWolf.assets.Werewolf.Configuration
         public float WereWolfNightRegen { get; set; } = 0.25f;
         public float WereWolfDayRegen { get; set; } = 0.05f;
         public long WereWolfTransformCoolDown { get; set; } = 5;
+
+
+        // Misc
         public bool WereWolfTransformSound { get; set; } = true;
         public bool WereWolfAttackSound { get; set; } = true;
         public bool WereWolfModelSwitcher { get; set; } = true;
+        public bool WereWolfFormLupine { get; set; } = false;
 
+        public bool WereWolfFormNormal { get; set; } = true;
 
 
 

@@ -111,7 +111,10 @@ namespace VintageStoryHarmony
                     WereWolfEnabledMinBrightness = 0.8f,
                     WereWolfTransformSound = true,
                     WereWolfAttackSound = true,
-                    WereWolfModelSwitcher = true
+                    WereWolfModelSwitcher = true,
+                    WereWolfFormNormal = true,
+                    WereWolfFormLupine = false
+                   
 
                 };
 

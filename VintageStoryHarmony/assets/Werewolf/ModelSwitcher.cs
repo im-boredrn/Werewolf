@@ -23,9 +23,20 @@ namespace WereWolf.assets.Werewolf
             
             var behavior = entity.GetBehavior<PlayerSkinBehavior>();
             if (behavior == null) return;
-            if (PlayerData.GetForm(entity) == PlayerData.Forms.WereWolf)
+
+            if (PlayerData.GetForm(entity) == PlayerData.Forms.WereWolf && WereWolfModSettings.NormalForm == true)
             {
                 behavior.SetCurrentModel("wolfplayer:werewolf", 1.4f);
+            }
+            else if (PlayerData.GetForm(entity) == PlayerData.Forms.VulpisHuman)
+            {
+                behavior.SetCurrentModel("seraph", 1.1f);
+            }
+
+            if (PlayerData.GetForm(entity) == PlayerData.Forms.WereWolf && WereWolfModSettings.LupineForm == true)
+            {
+                behavior.SetCurrentModel("lupines:lupine", 1.3f);
+
             }
             else if (PlayerData.GetForm(entity) == PlayerData.Forms.VulpisHuman)
             {
