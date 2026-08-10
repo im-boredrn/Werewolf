@@ -12,10 +12,11 @@ using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 using VintageStoryHarmony;
-using WereWolf.assets.Werewolf.Configuration;
-using static WereWolf.assets.Coresystems.PlayerData;
+using WereWolf.Coresystems;
+using WereWolf.Werewolf.Configuration;
+using static WereWolf.Coresystems.PlayerData;
 
-namespace WereWolf.assets.Coresystems.StatRelated
+namespace WereWolf.Coresystems.StatRelated
 {
     internal class StatsManager
     {

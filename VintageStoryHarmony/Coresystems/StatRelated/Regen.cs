@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
-using WereWolf.assets.Werewolf.Configuration;
+using WereWolf.Coresystems;
+using WereWolf.Werewolf.Configuration;
 
-namespace WereWolf.assets.Coresystems.StatRelated
+namespace WereWolf.Coresystems.StatRelated
 {
     internal class Regen
     {

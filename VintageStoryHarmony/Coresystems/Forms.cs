@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vintagestory.API.Common;
 
-namespace WereWolf.assets.Coresystems
+namespace WereWolf.Coresystems
 {
 
     public class PlayerData

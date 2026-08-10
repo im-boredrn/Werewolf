@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vintagestory.API.Common.Entities;
 
-namespace WereWolf.assets.Coresystems
+namespace WereWolf.Coresystems
 {
     internal class WolfTime
     {

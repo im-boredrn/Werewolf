@@ -11,16 +11,18 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 using VintageStoryHarmony;
-using WereWolf.assets.Coresystems.Infections;
-using WereWolf.assets.Coresystems.StatRelated;
-using WereWolf.assets.Werewolf.Configuration;
-using static WereWolf.assets.Coresystems.PlayerData;
+using WereWolf.Coresystems.Infections;
+using WereWolf.Coresystems.StatRelated;
+using WereWolf.Werewolf.Configuration;
+using static WereWolf.Coresystems.PlayerData;
 
-namespace WereWolf.assets.Coresystems
+namespace WereWolf.Coresystems
 {
     internal class TransformationController
     {
         private static bool debugMode = false;
+        Dictionary<EntityPlayer, long> transformCooldowns;
+
         public static void TrySetForm(IServerPlayer player, Forms targetForm, TransformationReason reason)
         {
             var entity = player.Entity;
@@ -150,8 +152,27 @@ namespace WereWolf.assets.Coresystems
 
 
         }
+
+        public  bool CooldownReady(EntityPlayer player)
+        {
+            long currentTick = player.World.ElapsedMilliseconds;
+
+            if (transformCooldowns.TryGetValue(player, out var last))
+            {
+                if (currentTick - last < WereWolfModSettings.TransformCooldownMS) return false;
+            }
+
+
+            
+            transformCooldowns[player] = currentTick;
+            return true;
+        }
+
+
         public static bool IsCooldownReady(EntityPlayer player)
         {
+           
+
             long lastTransformTick = player.WatchedAttributes.GetLong("lastTransformTick", 0);
             long currentTick = player.World.ElapsedMilliseconds;
             return currentTick - lastTransformTick >= WereWolfModSettings.TransformCooldownMS;

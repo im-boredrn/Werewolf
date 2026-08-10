@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
-using WereWolf.assets.Coresystems;
 using WereWolf.assets.Werewolf;
-using WereWolf.assets.Werewolf.Configuration;
-using static WereWolf.assets.Coresystems.PlayerData;
+using WereWolf.Coresystems;
+using WereWolf.Werewolf.Configuration;
+using static WereWolf.Coresystems.PlayerData;
 
 namespace VintageStoryHarmony
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WereWolf.assets.Werewolf.Configuration
+namespace WereWolf.Werewolf.Configuration
 {
     public  class WerewolfConfig
     {

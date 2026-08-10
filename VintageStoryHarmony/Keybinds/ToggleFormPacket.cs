@@ -5,9 +5,9 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using WereWolf.assets.Coresystems;
 using ProtoBuf;
-namespace WereWolf.assets.Keybinds
+using WereWolf.Coresystems;
+namespace WereWolf.Keybinds
 {
 
     [ProtoContract]

@@ -9,9 +9,10 @@ using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.Server;
-using static WereWolf.assets.Coresystems.PlayerData;
+using WereWolf.Coresystems;
+using static WereWolf.Coresystems.PlayerData;
 
-namespace WereWolf.assets.Coresystems.Infections
+namespace WereWolf.Coresystems.Infections
 {
 
     internal class EntityBehaviorInfection : EntityBehavior

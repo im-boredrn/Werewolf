@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using VintageStoryHarmony;
-using WereWolf.assets.Coresystems;
-using WereWolf.assets.Werewolf.Configuration;
+using WereWolf.Coresystems;
+using WereWolf.Werewolf.Configuration;
 
-namespace WereWolf.assets.Werewolf
+namespace WereWolf.Werewolf
 {
     internal class ModelSwitcher
     {

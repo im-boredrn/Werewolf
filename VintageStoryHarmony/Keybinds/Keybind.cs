@@ -10,11 +10,12 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 using VintageStoryHarmony;
-using WereWolf.assets.Coresystems;
+using WereWolf.assets.Keybinds;
 using WereWolf.assets.Werewolf.Configuration;
-using static WereWolf.assets.Coresystems.PlayerData;
+using WereWolf.Coresystems;
+using static WereWolf.Coresystems.PlayerData;
 
-namespace WereWolf.assets.Keybinds
+namespace WereWolf.Keybinds
 {
     public class Keybind
     {

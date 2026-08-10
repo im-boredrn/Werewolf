@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VintageStoryHarmony;
 
-namespace WereWolf.assets.Werewolf.Configuration
+namespace WereWolf.Werewolf.Configuration
 {
     internal class WereWolfModSettings
     {

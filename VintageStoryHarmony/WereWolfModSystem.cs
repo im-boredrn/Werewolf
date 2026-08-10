@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -12,13 +13,13 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
-using WereWolf.assets.Coresystems;
-using WereWolf.assets.Coresystems.Infections;
-using WereWolf.assets.Coresystems.StatRelated;
-using WereWolf.assets.Keybinds;
-using WereWolf.assets.Werewolf;
-using WereWolf.assets.Werewolf.Configuration;
-using static WereWolf.assets.Coresystems.PlayerData;
+using WereWolf.Coresystems;
+using WereWolf.Coresystems.Infections;
+using WereWolf.Coresystems.StatRelated;
+using WereWolf.Keybinds;
+using WereWolf.Werewolf;
+using WereWolf.Werewolf.Configuration;
+using static WereWolf.Coresystems.PlayerData;
 
 namespace VintageStoryHarmony
 {
@@ -28,6 +29,8 @@ namespace VintageStoryHarmony
         // Called on server and client
         // Useful for registering block/entity classes on both sides
         public ICoreClientAPI? Capi { get; private set; }
+
+        Dictionary<Forms, List<EntityPlayer>> playersByForm;
 
         private Harmony? harmony;
 
@@ -241,7 +244,15 @@ namespace VintageStoryHarmony
 
         private void OnServerTick(float dt)
         {
+            foreach (var wolf in playersByForm[Forms.WereWolf])
+            {
+                Regen.ApplyRegen(wolf); // Apply to wolf only
+            }
 
+            foreach (var vulpis in playersByForm[Forms.VulpisHuman])
+            {
+                Regen.ApplyRegen(vulpis);
+            }
             foreach (IServerPlayer player in sapi?.World.AllOnlinePlayers ?? Array.Empty<IServerPlayer>())
             {
                 var entity = player?.Entity as EntityPlayer;
@@ -259,10 +270,10 @@ namespace VintageStoryHarmony
           //      entity.World.Logger.Warning($"SERVER sees form: {PlayerData.GetForm(entity)}");
              
                 TransformationController.ProcessTransformation(player, dt);
-                if (PlayerData.GetForm(entity) != Forms.UnchangedHuman)
-                {
-                    Regen.ApplyRegen(entity);
-                }
+             //   if (PlayerData.GetForm(entity) != Forms.UnchangedHuman)
+             //   {
+              //      Regen.ApplyRegen(entity);
+               // }
 
 
             }
