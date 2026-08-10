@@ -41,7 +41,7 @@ namespace VintageStoryHarmony
         public Forms ManualForm;
         private Forms lastForm;
         private bool initialized = false;
-
+        private readonly Network Network;
 
         public static WerewolfConfig? Config;
 
@@ -67,6 +67,7 @@ namespace VintageStoryHarmony
             harmony = new Harmony(PLUGIN_GUID);
             harmony.PatchAll();
 
+            Network = new Network();
             base.Start(api);
 
 
@@ -264,9 +265,6 @@ namespace VintageStoryHarmony
                 bool day = !night;
 
                 var beastform = PlayerData.GetForm(entity);
-                // Safe logging
-                // LOG SPAMMERS JUST FOR TESTING  sapi?.Logger.Warning($"Hour: {entity.World.Calendar?.HourOfDay ?? -1} | Night: {night}");
-
           //      entity.World.Logger.Warning($"SERVER sees form: {PlayerData.GetForm(entity)}");
              
                 TransformationController.ProcessTransformation(player, dt);

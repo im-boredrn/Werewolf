@@ -10,8 +10,8 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 using VintageStoryHarmony;
-using WereWolf.assets.Keybinds;
-using WereWolf.assets.Werewolf.Configuration;
+using WereWolf.Keybinds;
+using WereWolf.Werewolf.Configuration;
 using WereWolf.Coresystems;
 using static WereWolf.Coresystems.PlayerData;
 
